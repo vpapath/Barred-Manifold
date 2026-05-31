@@ -1,95 +1,87 @@
-# The Barred Manifold
+# The Barred Manifold: Formal Foundations
 
-**Lacanian Psychoanalysis, Information Geometry, and the Free Energy Principle**
+This repository contains the Agda formalizations and paper sources for a series of papers applying Homotopy Type Theory to Lacan's formal apparatus.
 
-Vassilis Papathanasiou — b.papath02@gmail.com  
-Department of Psychology, National and Kapodistrian University of Athens  
-Research Master's in Brain and Cognitive Sciences (Cognitive Neuroscience), University of Amsterdam, 2026–
+## Papers and Code
+
+### 01 — Sexual Difference as Universe Stratification
+
+**Paper:** `sexual_difference_universe_stratification.pdf`
+**Code:** `Sexuation.agda`
+**Status:** Machine-verified in Agda 2.6.3, `--without-K --safe`
+
+Formalizes Lacan's four formulas of sexuation using HoTT's universe hierarchy. The masculine position is Type_i-bounded; the feminine position requires universe-polymorphic operations that lift to Type_{i+1}. Three theorems: structural asymmetry, universe grounding asymmetry, and the absence of the sexual relation (*il n'y a pas de rapport sexuel*) as a universe-level result — any relation between the structures lives at Type_{i+2}.
+
+**Key result:** `MascFem-Contradiction`, `MascGrounding`, `SexualRelation-Type` — all verified.
 
 ---
 
-## Overview
+### 02 — Logical Time as Universe Lifting
 
-This repository contains the complete working documents for the research program developed in *The Barred Manifold*: a formal reconstruction of Lacanian psychoanalytic theory in information geometry and active inference, conducted as a bidirectional formal dialogue. The formalization direction maps Lacanian structural claims to their mathematical successors in the Fisher metric, the Helmholtz decomposition, and variational inference. The extension direction proposes formal objects — the structural hyperprior with singularity, the category of symbolic positions, the non-closing trajectory — that the FEP literature did not previously contain.
+**Paper:** `logical_time_universe_stratification.pdf`
+**Code:** `LogicalTime.agda`
+**Status:** Part One machine-verified (`--without-K --safe`); Part Two conditional on shape modality axioms (not `--safe`)
 
-The project constitutes a progressive research programme in the Lakatosian sense: hard core (Borromean entanglement of RSI, constitutive incompleteness of the subject, irreducible solenoidal surplus), protective belt (specific formalizations), positive heuristic (three empirical predictions in §10.5 of the main thesis).
+Formalizes Lacan's three moments of logical time (1945) in the universe hierarchy. The instant of the glance is a Type_i observation; the time for comprehending is oscillation that cannot self-ground within Type_i; the moment of concluding is a universe-lifting Π-type at Type_{i+1}. The *après-coup* is a theorem: the Type_{i+1} commitment constitutes the meaning of the Type_i evidence retroactively.
+
+**Key result:** `Concluding-is-MascUniversal` — proved by `refl`. The moment of concluding and the masculine universal are definitionally identical. Logical time and sexual difference share a single formal structure.
 
 ---
 
-## Repository Structure
+### 03 — Constitutive Directionality and the Limits of Simplicial Type Theory
 
+**Paper:** `constitutive_directionality_directed_HoTT.pdf`
+**Code:** `CTT.agda`
+**Status:** Shallow embedding with postulated axioms. Core theorems verified given postulates. Irreversibility encoded in formation rules. Open conjecture (constitutive directed univalence) stated but unproved.
+
+Proposes Constitutive Type Theory (CTT): a minimal extension of HoTT with a constitutive homomorphism type `ConstHom a b` for `a : Type_i`, `b : Type_{i+1}`. The type captures the structure absent from simplicial type theory (Riehl–Shulman 2017; Gratzer–Weinberger–Buchholtz 2024): constitutive directionality, where the later term retroactively constitutes the meaning of the earlier. The *après-coup* as an elimination rule. Irreversibility enforced by the formation rule's level constraints.
+
+**Open conjecture:** Constitutive directed univalence — types with the same constituting term are identified. Resolving this would connect CTT to the directed univalence results of Gratzer–Weinberger–Buchholtz 2024.
+
+---
+
+## Epistemic Status Summary
+
+| File | Mode | Status |
+|------|------|--------|
+| `Sexuation.agda` | `--without-K --safe` | ✓ Fully verified |
+| `LogicalTime.agda` (Part 1) | `--without-K --safe` | ✓ Fully verified |
+| `LogicalTime.agda` (Part 2) | postulates | ✓ Conditional |
+| `CTT.agda` | postulates | ✓ Conditional |
+
+---
+
+## How to Verify
+
+Requirements: Agda 2.6.3, agda-stdlib 1.7.3
+
+```bash
+# Verify Paper 01
+agda -i /path/to/agda-stdlib -i 01-sexuation 01-sexuation/Sexuation.agda
+
+# Verify Paper 02 (Part One only — Part Two requires removing --safe)
+agda -i /path/to/agda-stdlib -i 02-logical-time 02-logical-time/LogicalTime.agda
+
+# Verify Paper 03 (postulates only, no --safe)
+agda -i /path/to/agda-stdlib -i 03-directed-hott 03-directed-hott/CTT.agda
 ```
-barred_manifold/
-├── thesis/
-│   └── the_barred_manifold_complete.docx     # Main thesis (733 paragraphs, ~40k words)
-│
-├── papers/
-│   ├── paper_barred_other_hyperprior.docx    # Three problems in Lacanian active inference
-│   ├── paper_sexuation_zfc_hott.docx         # Formulas of sexuation in ZFC and HoTT
-│   ├── paper_borromean_triple_network.docx   # Borromean RSI and triple network
-│   ├── paper_information_geometry_subject.docx  # Statistical manifold and Lacanian subject
-│   ├── paper_transference_logical_time.docx  # Transference and logical time
-│   ├── paper_symptom_networks_free_energy.docx  # Symptom networks as free-energy landscapes
-│   └── loudovikos_fep_paper.docx             # Dialogical personhood and the barred Other
-│
-├── supplements/
-│   └── epistemology_frameworks.docx          # Epistemological framework research report
-│
-└── README.md
-```
 
 ---
 
-## Core Formal Results
+## Disclosure
 
-| Result | Location | Status |
-|--------|----------|--------|
-| Proposition 1: KL divergence to boundary (general) | Preliminary Ch. | ✓ Proved |
-| Proposition 1b: Fisher geodesic distance (Gaussian class) | Preliminary Ch. | ✓ Proved |
-| Proposition 2: Irreducible free energy residual | Preliminary Ch. | ✓ Proved |
-| Ising-IRT free energy identity F*(σ) = H(σ) + log Z | §10.4 | ✓ Derived |
-| Metaphor/metonymy as e/m-geodesics (Gaussian worked example) | §2.3 | ✓ Executed |
-| Après-coup as Bayesian theorem | §2.2 | ✓ Proved |
-| Naturality conditions: all five morphisms | §10.1 | ✓ Verified |
-| General exponential family Fisher geodesic result | — | Open (dissertation direction) |
+These papers were developed with assistance from Claude (Anthropic) for mathematical derivation, Agda development, and structural drafting. All theoretical arguments, formal specifications, interpretive claims, and editorial choices are the author's own. The AI collaboration is disclosed in the acknowledgments of each paper.
 
 ---
 
-## Empirical Predictions (§10.5)
+## License
 
-Three testable predictions with explicit datasets, pipelines, and disconfirmation conditions:
-
-1. **Topological signatures**: neurotic symptom networks → high β₁ (persistent homology), psychotic → collapsed β₁. Dataset: NESDA, Borsboom lab networks. Pipeline: Gudhi.
-2. **Borromean conditional independence**: triple network resting-state fMRI shows pairwise near-independence with non-zero three-way interaction. Dataset: HCP, COBRE.
-3. **Attractor regime signatures**: solenoidal fraction differences across diagnostic groups in longitudinal ESM data. Dataset: Maastricht ESM, TRAILS.
+All content © Vassilis Papathanasiou 2026. Code released under MIT License. Papers released under CC BY 4.0.
 
 ---
 
-## Six Standalone Papers
+## Contact
 
-| Paper | Target journal | Status |
-|-------|---------------|--------|
-| Barred Other as Structural Hyperprior | Psychoanalysis, Culture & Society / Frontiers in Psychology | Ready |
-| Formulas of Sexuation in ZFC and HoTT | JAPA / Psychoanalysis, Culture & Society | Ready |
-| Borromean RSI and Triple Network | Neuropsychoanalysis | Ready |
-| Statistical Manifold and Lacanian Subject | Neuropsychoanalysis / J. Theoretical Biology | Ready |
-| Transference and Logical Time | Frontiers in Psychiatry / Psychoanalytic Dialogues | Ready |
-| Symptom Networks as Free-Energy Landscapes | PsyArXiv (preprint) / Psychological Review | Ready — push first |
-
----
-
-## Key References
-
-- Amari, S. (2016). *Information geometry and its applications*. Springer.
-- Friston, K. J. (2019). A free energy principle for a particular physics. *arXiv:1906.10184*.
-- Hesp, C., Smith, R., Friston, K. J., & Ramstead, M. J. D. (2021). Deeply felt affect. *Neural Computation, 33*(2), 398–446.
-- Lacan, J. (2002). *Écrits*. Norton.
-- Ladyman, J., & Ross, D. (2007). *Every thing must go*. Oxford University Press.
-- Marsman, M., et al. (2018). An introduction to network psychometrics. *Multivariate Behavioral Research, 53*(1), 15–35.
-
----
-
-## Contact / Correspondence
-
-Vassilis Papathanasiou · b.papath02@gmail.com  
-Priority contacts: Sacha Marsman (UvA, Ising-IRT), Ariane Bazan (Université de Lorraine)
+Vassilis Papathanasiou  
+University of Amsterdam  
+b.papath02@gmail.com  

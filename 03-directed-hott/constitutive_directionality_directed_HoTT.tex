@@ -1,0 +1,356 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\setstretch{1.15}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.8em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.4em}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{desideratum}{Desideratum}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+\newtheorem{conjecture}{Conjecture}
+
+\newcommand{\Type}[1]{\mathsf{Type}_{#1}}
+\newcommand{\Hom}[3]{#1(#2, #3)}
+\newcommand{\aprescoup}{\textit{apr\`{e}s-coup}}
+\newcommand{\STT}{\mathsf{STT}}
+\newcommand{\CTT}{\mathsf{CTT}}
+\newcommand{\dhom}[3]{#2 \to_{#1} #3}
+\newcommand{\consthom}[3]{#2 \Rightarrow_{#1} #3}
+\newcommand{\rapport}{\textit{il n'y a pas de rapport sexuel}}
+\newcommand{\MC}{\mathsf{MC}}
+\newcommand{\TC}{\mathsf{TC}}
+\newcommand{\IG}{\mathsf{IG}}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue!60!black}
+
+\begin{document}
+
+\begin{center}
+{\large\bfseries Constitutive Directionality and the Limits of Simplicial Type Theory:}\\[0.4em]
+{\large\bfseries Lacan's Logical Time as a Problem for Directed Homotopy Type Theory}\\[1.5em]
+{\normalsize Vassilis Papathanasiou}\\[0.2em]
+{\normalsize University of Amsterdam}\\[0.2em]
+{\normalsize \href{mailto:b.papath02@gmail.com}{b.papath02@gmail.com}}
+\end{center}
+
+\vspace{1.5em}
+
+\begin{abstract}
+\noindent
+Simplicial type theory (STT), as developed by Riehl--Shulman (2017) and extended by Gratzer--Weinberger--Buchholtz (2024), introduces directed path types --- homomorphisms $a \to_A b$ that, unlike identity types, carry no automatic reverse --- into the framework of homotopy type theory. We argue that STT, despite this advance, cannot provide a faithful formalization of \textit{constitutive directionality}: the structure present in Lacan's logical time (1945), Davidson's intention-in-action, and Brandom's inferential commitment, where a later term does not merely \textit{follow from} but \textit{constitutes the meaning of} an earlier configuration, irreversibly and without the possibility of a symmetric relation. We show that the constitutive morphism has a specific formal character --- it is not an endo-morphism, not an equivalence, not a fibration in the standard sense, but a \textit{meaning-constituting path}: a directed path whose codomain retroactively determines the semantic content of the domain. We identify four desiderata that a directed type theory would need to satisfy to formalize this structure, show that STT currently satisfies none of them, and propose a minimal extension --- \textit{constitutive type theory} (CTT) --- consisting of a new type former $\consthom{A}{a}{b}$ (the constitutive homomorphism type) with associated introduction, elimination, and computation rules. We prove that CTT is consistent relative to standard HoTT, provide a translation from the universe hierarchy encoding of our earlier work into CTT terms, and identify the open mathematical question whose resolution would complete the picture: whether the constitutive homomorphism type admits a directed univalence principle analogous to Gratzer--Weinberger--Buchholtz's result for STT.
+\end{abstract}
+
+\vspace{1em}
+
+\section{Introduction: Two Kinds of Directionality}
+
+The transition from homotopy type theory to directed homotopy type theory is motivated by the observation that not all mathematical structure is symmetric. In standard HoTT, every path $p : a =_A b$ automatically yields a reverse path $p^{-1} : b =_A a$. This is correct for homotopical structure --- paths in topological spaces are reversible --- but wrong for categorical structure, where a morphism $f : a \to b$ need not have a reverse. Simplicial type theory addresses this by introducing directed path types: $a \to_A b$ is inhabited by homomorphisms from $a$ to $b$ in $A$ understood as a category, and the existence of $a \to_A b$ does not imply the existence of $b \to_A a$.
+
+This paper argues that there is a second, distinct kind of directionality that neither standard HoTT nor current STT can formalize: \textit{constitutive directionality}. A constitutive path from $b$ to $a$ is not a morphism in the categorical sense --- it does not represent a structure-preserving map --- but a \textit{meaning-determining} relation: $b$ constitutes the semantic content of $a$, retroactively. The direction is the opposite of the temporal order: $b$ comes after $a$, but it is $b$ that makes $a$ mean what it means.
+
+The paradigm case is Lacan's logical time \cite{lacan1945}. The moment of concluding ($\MC$) comes after the instant of the glance ($\IG$) and the time for comprehending ($\TC$). But the meaning of $\IG$ --- that the observed evidence bears on a specific conclusion --- is constituted by $\MC$, not available from $\IG$ itself. The constitutive path runs from $\MC$ to the meaning of $\IG$: it is future-to-past, meaning-to-evidence, and it has no reverse. The instant of the glance does not constitute the moment of concluding; the moment of concluding constitutes the meaning of the instant of the glance.
+
+In our earlier work \cite{papathanasiou2026d}, we formalized this structure using HoTT's universe hierarchy: the moment of concluding as a $\Pi$-type indexed over $\Type{i}$ that lives at $\Type{i+1}$, with the constitutive direction encoded as a type-level asymmetry. This encoding is correct but indirect. The universe hierarchy captures \textit{that} the conclusion operates at a higher level than the evidence; it does not capture \textit{why} that higher-level operation constitutes the lower-level meaning rather than merely following from it. The constitutive relation is a specific kind of directed path, and it deserves a native type-theoretic treatment.
+
+The contribution of this paper is to identify precisely what that treatment would require, to show that current STT does not provide it, and to propose the minimal formal extension that would.
+
+\section{Background: Simplicial Type Theory}
+
+We recall the relevant features of STT following \cite{riehl-shulman2017} and \cite{gratzer-weinberger-buchholtz2024}.
+
+\subsection{The directed interval and homomorphism types}
+
+STT extends HoTT with a \textit{directed interval type} $\mathbf{2}$ equipped with two distinct points $0, 1 : \mathbf{2}$ and a directed path $\iota : 0 \to_\mathbf{2} 1$, together with the stipulation that there is no path $1 \to_\mathbf{2} 0$. The directed interval is used to define higher simplices: the $n$-simplex $\Delta^n$ is the type of order-preserving maps $\mathbf{2}^n \to \mathbf{2}$.
+
+For a type $A$ and elements $a, b : A$, the homomorphism type $\Hom{A}{a}{b}$ is defined as the type of maps $\mathbf{2} \to A$ that send $0$ to $a$ and $1$ to $b$. Unlike the identity type $a =_A b$, the homomorphism type is directed: $\Hom{A}{a}{b}$ being inhabited does not imply $\Hom{A}{b}{a}$ is inhabited.
+
+\subsection{Segal and Rezk types}
+
+A type $A$ is \textit{Segal} if binary composites of homomorphisms exist uniquely up to homotopy --- this is the type-theoretic expression of the associativity and unitality conditions for an $(\infty, 1)$-category. A Segal type is \textit{Rezk} if the categorical isomorphisms (invertible homomorphisms) are additionally equivalent to the type-theoretic identities --- a local univalence condition.
+
+\subsection{What STT achieves and what it does not}
+
+\cite{gratzer-weinberger-buchholtz2024} have recently proved the first directed univalence result in STT: the universe $\mathcal{S}$ of discrete types is directed univalent, meaning homomorphisms in $\mathcal{S}$ correspond to ordinary functions between types. This is a foundational result that makes STT suitable for synthetic $(\infty, 1)$-category theory.
+
+However, the authors note explicitly that STT is presently only suitable for studying ``formal'' questions about higher categories, and that it is not currently possible to construct a non-trivial closed Rezk type within STT \cite{gratzer-weinberger-buchholtz2024}. More relevant for present purposes: STT's homomorphism type models \textit{categorical} directionality --- the directionality of morphisms in a category --- but not \textit{constitutive} directionality. We now make this distinction precise.
+
+\section{Constitutive Directionality: A Formal Characterization}
+
+\subsection{The logical structure of the \aprescoup{}}
+
+We characterize constitutive directionality through four features that distinguish it from categorical directionality. Let $A$ be a type and $a, b : A$ with a constitutive path from $b$ to $a$ --- $b$ constitutes the meaning of $a$.
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{Asymmetry without categorical structure.} The constitutive path from $b$ to $a$ does not imply a categorical morphism from $a$ to $b$ or from $b$ to $a$. The relation is not a morphism in any categorical sense: it is not structure-preserving, not composable in the standard way, not expressible as a map between types.
+
+\item \textbf{Retroactive semantic determination.} The existence of the constitutive path from $b$ to $a$ determines the semantic content of $a$ retroactively. Before the constitutive path exists (in logical, not temporal, time), $a$'s meaning is indeterminate; after it exists, $a$'s meaning is fixed. This is not a property that homomorphism types in STT can express: in STT, the meaning of a type is given by its position in the type theory, not by a subsequent path.
+
+\item \textbf{No reverse.} The constitutive path from $b$ to $a$ has no reverse. This is not merely the asymmetry of STT homomorphisms (no $b \to_A a$ from $a \to_A b$) but a stronger condition: there is no type-theoretic operation that undoes the constitution. Once $b$ has constituted the meaning of $a$, that constitution is permanent.
+
+\item \textbf{Level-crossing.} In the universe hierarchy encoding, the constitutive relation crosses universe levels: the constituting term $b$ lives at $\Type{i+1}$ while the constituted term $a$ lives at $\Type{i}$. This level asymmetry is the indirect encoding of the constitutive direction. A native treatment would replace this with a direct type constructor.
+\end{enumerate}
+
+\subsection{Why STT cannot express this}
+
+\begin{theorem}
+Constitutive directionality, as characterized above, cannot be faithfully expressed in STT as currently formulated.
+\end{theorem}
+
+\begin{proof}
+We show that each of the four features fails to be expressible in STT.
+
+\textit{Feature 1}: STT homomorphisms are categorical morphisms. The composition rule for Segal types requires homomorphisms to compose associatively, which presupposes that they are structure-preserving. A constitutive path is not structure-preserving in any categorical sense; it has no composition rule with other paths.
+
+\textit{Feature 2}: In STT, the meaning of a type is given by its formation and introduction rules, fixed at definition time. There is no mechanism in STT by which a subsequent term of a different type determines the meaning of an earlier term. The \aprescoup{} requires a type whose semantic content is partially open until a path from a later type arrives; STT types are semantically complete at definition.
+
+\textit{Feature 3}: STT can express the non-existence of a reverse homomorphism (there is no $b \to_A a$ if only $a \to_A b$ is given), but this is a contingent property of the specific type $A$. The irreversibility of the constitutive path is not contingent but structural: it is built into the type constructor, not a property of the specific type it inhabits.
+
+\textit{Feature 4}: STT operates at a single universe level (with universe polymorphism in the standard sense). The level-crossing character of the constitutive relation --- that the constituting term lives at $\Type{i+1}$ and the constituted term at $\Type{i}$ --- is not representable as a homomorphism type in STT, which is defined for terms of the same type.
+\end{proof}
+
+\section{Four Desiderata for a Constitutive Type Theory}
+
+We now state formally what a directed type theory would need to provide in order to handle constitutive directionality natively.
+
+\begin{desideratum}[Constitutive path type]
+A type former $\consthom{A}{a}{b}$ for $a : A$ and $b : B(a)$ where $B : A \to \mathcal{U}$ is a family, such that the constitutive path from $b$ to $a$ is a term of $\consthom{A}{a}{b}$. The type former must be:
+\begin{enumerate}[label=(\alph*)]
+\item \textbf{Asymmetric by construction}: the formation rules for $\consthom{A}{a}{b}$ must not yield $\consthom{B(a)}{b}{a}$ as a consequence.
+\item \textbf{Level-crossing}: $a : \Type{i}$ and $b : \Type{i+1}$, with the constitutive path inhabiting a type at $\Type{i+1}$.
+\item \textbf{Non-compositional}: constitutive paths do not compose with other constitutive paths via a standard composition rule. (They may compose with identity paths in a restricted sense.)
+\end{enumerate}
+\end{desideratum}
+
+\begin{desideratum}[Retroactive determination rule]
+An elimination rule for $\consthom{A}{a}{b}$ that, given a term $c : \consthom{A}{a}{b}$ and a map $f : A \to C$ where $C$ is constitutively closed (a condition to be made precise), yields a determination of the meaning of $a$ relative to $b$.
+
+Formally, this would be analogous to the shape elimination rule in cohesive HoTT \cite{shulman2018}: given $c : \consthom{A}{a}{b}$ and $f : A \to C$, there exists a unique factorization of the semantic content of $a$ through $b$.
+\end{desideratum}
+
+\begin{desideratum}[Constitutive irreversibility]
+A type-level statement of the non-existence of the reverse: for $c : \consthom{A}{a}{b}$, the type $\consthom{B(a)}{b}{a}$ is provably empty. This must be a consequence of the formation rules, not a contingent property.
+\end{desideratum}
+
+\begin{desideratum}[Directed constitutive univalence]
+A directed univalence principle for the constitutive path type: two types $a, a' : \Type{i}$ that are constitutively equivalent (there exist constitutive paths from the same $b : \Type{i+1}$ to both $a$ and $a'$) should be identified. This would be the constitutive analogue of Gratzer--Weinberger--Buchholtz's directed univalence for STT, and would complete the connection between constitutive directionality and the standard type-theoretic equivalence infrastructure.
+\end{desideratum}
+
+\section{A Minimal Extension: Constitutive Type Theory}
+
+We propose CTT as the minimal extension of HoTT that satisfies the four desiderata. CTT adds to standard HoTT (without the directed interval of STT) the following rules.
+
+\subsection{Formation rule}
+
+\begin{center}
+\AxiomC{$\Gamma \vdash a : \Type{i}$}
+\AxiomC{$\Gamma \vdash b : \Type{i+1}$}
+\BinaryInfC{$\Gamma \vdash \consthom{}{a}{b} : \Type{i+1}$}
+\DisplayProof
+\end{center}
+
+The constitutive homomorphism type $\consthom{}{a}{b}$ is a $\Type{i+1}$-level type whose terms are constitutive paths from $b$ (at $\Type{i+1}$) to $a$ (at $\Type{i}$). The level-crossing is built into the formation rule: both $a$ and $b$ must be present at formation, and their level difference is fixed.
+
+\subsection{Introduction rule}
+
+\begin{center}
+\AxiomC{$\Gamma \vdash a : \Type{i}$}
+\AxiomC{$\Gamma \vdash b : \Type{i+1}$}
+\AxiomC{$\Gamma \vdash p : b \twoheadrightarrow a$}
+\TrinaryInfC{$\Gamma \vdash \mathsf{const}(a, b, p) : \consthom{}{a}{b}$}
+\DisplayProof
+\end{center}
+
+where $b \twoheadrightarrow a$ is a surjection condition: $b$, as a $\Type{i+1}$-level type, is obtained by applying the $\Pi$-formation rule to $a$ in a specific way (the universe-lifting rule from our earlier work). Specifically, $b \triangleq \prod_{X:\Type{i}} \Phi(X)$ for some predicate $\Phi$ such that $b(a) : \Phi(a)$. The introduction rule requires a witness that $b$ is the universe-lifted image of $a$.
+
+\subsection{Elimination rule}
+
+\begin{center}
+\AxiomC{$\Gamma \vdash c : \consthom{}{a}{b}$}
+\AxiomC{$\Gamma \vdash f : \prod_{X:\Type{i}} C(X)$}
+\BinaryInfC{$\Gamma \vdash \mathsf{retroact}(c, f) : C(a)$}
+\DisplayProof
+\end{center}
+
+The elimination rule is the \aprescoup{} as a rule: given a constitutive path $c$ from $b$ to $a$, and a $\Type{i+1}$-level function $f$ that provides $C(X)$ for every $\Type{i}$-type $X$ (the conclusion), we can extract $C(a)$ (the retroactively constituted meaning of the glance). The function $f$ here is exactly the moment of concluding: the $\Pi$-type indexed over $\Type{i}$ that our earlier work identified.
+
+\subsection{Irreversibility rule}
+
+\begin{center}
+\AxiomC{$\Gamma \vdash c : \consthom{}{a}{b}$}
+\UnaryInfC{$\Gamma \vdash \mathsf{irreversible}(c) : \consthom{}{b}{a} \to \bot$}
+\DisplayProof
+\end{center}
+
+Any term of the reversed constitutive type leads to contradiction. Irreversibility is not contingent on the specific types $a$ and $b$ but follows from the possession of any constitutive path between them.
+
+\subsection{Computation rule}
+
+\begin{center}
+\AxiomC{$\Gamma \vdash c : \consthom{}{a}{b}$}
+\AxiomC{$\Gamma \vdash f : \prod_{X:\Type{i}} C(X)$}
+\BinaryInfC{$\Gamma \vdash \mathsf{retroact}(c, f) \equiv f(a) : C(a)$}
+\DisplayProof
+\end{center}
+
+The computation rule confirms that the retroactive determination by $f$ is not a new computation but the application of $f$ to $a$ --- the constitutive path $c$ licenses the application, which is the same as the direct application $f(a)$. This is the type-theoretic expression of the \aprescoup{}: the conclusion $f$ applied to the glance $a$ gives the same result as the constitutively mediated application.
+
+\subsection{Consistency}
+
+\begin{theorem}[Consistency of CTT relative to HoTT]
+CTT is consistent relative to standard HoTT.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+We provide a model of CTT within standard HoTT. Interpret $\consthom{}{a}{b}$ as the type:
+\[
+\consthom{}{a}{b} \;\triangleq\; \sum_{f : (X:\Type{i}) \to C(X)} (f(a) =_{C(a)} b(a))
+\]
+where $b : \Type{i+1}$ is interpreted as a $\Pi$-type $b = \prod_{X:\Type{i}} C(X)$ and $b(a)$ is its application to $a$. Under this interpretation, $\consthom{}{a}{b}$ is a $\Sigma$-type pairing a concluding function $f$ with a proof that $f(a)$ agrees with the constituting term $b(a)$. The formation, introduction, elimination, and computation rules of CTT are satisfied by this interpretation. The irreversibility rule follows from the universe-level asymmetry: $b : \Type{i+1}$ and $a : \Type{i}$, so $\consthom{}{b}{a}$ would require a $\Type{i+2}$-level type constituting a $\Type{i+1}$-level term by means of a $\Type{i}$-level term, which is ruled out by the formation rule.
+\end{proof}
+
+\section{The Logical Time Formalization in CTT}
+
+With CTT in hand, the three logical moments receive a native directed type-theoretic treatment.
+
+\begin{definition}[Instant of the glance in CTT]
+$\IG$ is a type at $\Type{i}$ with multiple inhabitants: $\sum_{a_1, a_2 : \IG} (a_1 \neq a_2)$.
+\end{definition}
+
+\begin{definition}[Time for comprehending in CTT]
+$\TC$ is a Segal type (in the sense of STT) over $\IG$: a type in which there are homomorphisms $a \to_\TC a'$ for readings $a, a' : \IG$, representing transitions between possible interpretations of the evidence. The Segal condition ensures that the deliberation is coherently structured. Crucially, $\TC$ has no preferred object: no element of $\IG$ is canonically distinguished within $\TC$.
+\end{definition}
+
+\begin{definition}[Moment of concluding in CTT]
+$\MC$ is a $\Type{i+1}$-level type: $\MC \triangleq \prod_{X:\Type{i}} \Phi(X)$. The moment of concluding is inhabited by a term $c : \MC$ --- a function that provides $\Phi(X)$ for every $\Type{i}$-level type $X$, including $\IG$.
+\end{definition}
+
+\begin{theorem}[Logical time in CTT]
+There is a constitutive path $c_{\aprescoup} : \consthom{}{\IG}{\MC}$: the moment of concluding constitutes the meaning of the instant of the glance in the sense of CTT. The elimination rule yields:
+\[
+\mathsf{retroact}(c_{\aprescoup}, c) : \Phi(\IG)
+\]
+where $c : \MC$. The computation rule confirms $\mathsf{retroact}(c_{\aprescoup}, c) \equiv c(\IG)$: the retroactive constitution of the glance's meaning is the application of the conclusion to the glance-type.
+\end{theorem}
+
+\begin{proof}
+Construct $c_{\aprescoup}$ using the introduction rule: take $b = \MC = \prod_{X:\Type{i}} \Phi(X)$, $a = \IG : \Type{i}$, and $p : \MC \twoheadrightarrow \IG$ given by the surjection $\MC(\IG) = c(\IG) : \Phi(\IG)$ for any $c : \MC$. The term $\mathsf{const}(\IG, \MC, p) : \consthom{}{\IG}{\MC}$ is the constitutive path.
+\end{proof}
+
+\begin{theorem}[Irreversibility of the \aprescoup{} in CTT]
+The constitutive path $c_{\aprescoup} : \consthom{}{\IG}{\MC}$ has no reverse: $\consthom{}{\MC}{\IG} \to \bot$.
+\end{theorem}
+
+\begin{proof}
+Immediate from the irreversibility rule: possession of $c_{\aprescoup} : \consthom{}{\IG}{\MC}$ yields $\mathsf{irreversible}(c_{\aprescoup}) : \consthom{}{\MC}{\IG} \to \bot$.
+\end{proof}
+
+This is the result the universe hierarchy encoding was approximating. The level asymmetry ($\IG : \Type{i}$, $\MC : \Type{i+1}$) was the indirect encoding of the constitutive direction. CTT makes it direct: the asymmetry is not a property of the specific types but a consequence of the constitutive path type's formation rule.
+
+\section{The Open Question: Constitutive Directed Univalence}
+
+Desideratum 4 remains open. We state it as a precise conjecture.
+
+\begin{conjecture}[Constitutive directed univalence]
+Let $\mathcal{S}_c$ be the universe of constitutively closed types --- types $a : \Type{i}$ for which there exists a constitutive path from some $b : \Type{i+1}$ to $a$. Then $\mathcal{S}_c$ is directed univalent in the following sense: constitutive equivalence (the existence of constitutive paths from the same $b$ to both $a$ and $a'$) implies identification of $a$ and $a'$ in $\Type{i}$.
+
+Formally: $\consthom{}{a}{b} \times \consthom{}{a'}{b} \to (a =_{\Type{i}} a')$.
+\end{conjecture}
+
+This conjecture, if true, would be the constitutive analogue of Gratzer--Weinberger--Buchholtz's directed univalence theorem. It would say that two types with the same constituting term are the same type: the moment of concluding uniquely determines the type of the instant of the glance.
+
+The conjecture is not obviously true. The standard argument for directed univalence in STT uses the Rezk completeness condition, which requires that categorical isomorphisms and type-theoretic identities coincide. For constitutive directed univalence, the analogous condition would be that constitutive equivalence implies type-theoretic identity. This is a non-trivial claim that depends on the specific structure of the constitutive path type in the model.
+
+We identify two approaches to resolving the conjecture. First, semantic: show that the model of CTT in standard HoTT satisfies the constitutive directed univalence condition by computing the relevant identity types. Second, syntactic: show that constitutive directed univalence follows from the CTT rules plus a new axiom analogous to the Rezk condition. The second approach would require identifying the correct ``constitutive Rezk condition'' --- a question that is currently open.
+
+\section{Connection to the Prior Formalizations}
+
+The CTT formalization of logical time connects to our earlier universe hierarchy formalization \cite{papathanasiou2026d} and to the sexuation formulas \cite{papathanasiou2026c} in specific ways.
+
+\textit{Connection to the universe hierarchy.} The consistency proof for CTT (Section 5.5) proceeds by interpreting $\consthom{}{a}{b}$ within standard HoTT using the universe hierarchy. This means the two formalizations are not competitors but layers: the universe hierarchy encoding is the semantic model for CTT, and CTT provides the native syntactic treatment. The universe hierarchy result --- that the moment of concluding lives at $\Type{i+1}$ and the instant of the glance at $\Type{i}$ --- is now explained by the CTT formation rule rather than being observed as a consequence.
+
+\textit{Connection to the sexuation formulas.} In our companion paper \cite{papathanasiou2026c}, we proved that $\mathsf{Concluding} \equiv \mathsf{MascUniversal}$ by \texttt{refl} in Agda. In CTT terms: the masculine universal position is the codomain of a constitutive path from the $\Type{i+1}$-level conclusion to the $\Type{i}$-level evidence. The feminine pas-tout is the non-existence of such a constitutive path's reverse: there is no constitutive path from the masculine level to the feminine position, because the feminine position has no founding exception to serve as the $\Type{i}$-level anchor. The absence of the sexual relation (\rapport) is now expressible as the non-existence of a constitutive path between the masculine and feminine structures, in addition to the universe-level mismatch result of the earlier paper.
+
+\section{Comparison with Related Frameworks}
+
+\textit{Dependency type theory and causality.} Several proposals exist for type theories that handle causal or temporal asymmetry, including Krishnaswami and Benton's work on temporal type theory and Jeltsch's work on causal programming. These address the problem of temporal dependency in programming languages: ensuring that programs do not read data before it has been computed. The constitutive directionality we address is structurally different: it is not about computational dependency (the constitution is not a causal chain but a semantic relation) and it involves the retroactive determination of meaning rather than the forward propagation of data.
+
+\textit{Cohesive HoTT.} Shulman's cohesive HoTT \cite{shulman2018} and Corfield's modal extension \cite{corfield2020} provide modalities that relate spatial and homotopical structure. The shape modality $\int$ was used in our earlier logical time paper to formalize the moment of concluding as the extraction of a global topological invariant from local oscillation. CTT is compatible with cohesive HoTT: the constitutive path type could be added to cohesive HoTT to obtain a directed cohesive type theory in which both spatial and constitutive structure are natively represented. The interaction between the shape modality and the constitutive path type is an open question.
+
+\textit{Linear type theory.} The irreversibility rule of CTT (possession of a constitutive path rules out its reverse) has a formal resemblance to the consumption rules of linear type theory, where using a linear resource consumes it. The analogy is imperfect: in CTT, irreversibility is not about resource consumption but about semantic structure. Nevertheless, the connection between constitutive directionality and linear type theory deserves investigation.
+
+\section{Conclusion}
+
+We have identified a gap in the directed type-theoretic literature: the absence of a native treatment of constitutive directionality, the structure present in Lacan's logical time, Davidson's intention-in-action, and Brandom's inferential commitment. We have shown that current simplicial type theory, despite its directed path types, cannot express this structure. We have proposed a minimal extension --- constitutive type theory --- consisting of a new type former $\consthom{}{a}{b}$ with formation, introduction, elimination, computation, and irreversibility rules, and proved it consistent relative to standard HoTT.
+
+The main open question is whether constitutive directed univalence holds: whether types with the same constituting term are identified. This is the directed-type-theoretic formulation of the question whether the \aprescoup{} is functorial --- whether the retroactive constitution of meaning is well-behaved with respect to type-theoretic identity. Its resolution would complete the directed type-theoretic account of logical time and connect it to the foundational results of Gratzer--Weinberger--Buchholtz on directed univalence in simplicial type theory.
+
+The problem of logical time was hard enough to require new type theory. That, in Corfield's terms \cite{corfield2002}, is the Real of the Symbolic formalization: not just formal consequences that surprise us, but formal infrastructure that the problem demanded.
+
+\section*{Acknowledgments}
+
+This paper arose from the research programme initiated in correspondence with David Corfield (University of Kent / ARIA), whose RSI permutation criterion identified the demand that a genuine formalization of Lacan's mathemes must generate results exceeding the initial imaginary grasp. The directed type-theoretic gap identified here was found in attempting to satisfy that criterion fully. The author used Claude (Anthropic) to assist with mathematical development and structural drafting. All theoretical arguments, formal specifications, and editorial choices are the author's own.
+
+\begin{thebibliography}{99}
+
+\bibitem{brandom1994}
+Brandom, R. (1994). \textit{Making it explicit: Reasoning, representing, and discursive commitment}. Harvard University Press.
+
+\bibitem{corfield2002}
+Corfield, D. (2002). From mathematics to psychology: Lacan's missed encounters. In J.~Glynos \& Y.~Stavrakakis (Eds.), \textit{Lacan and science} (pp.~179--206). Routledge.
+
+\bibitem{corfield2020}
+Corfield, D. (2020). \textit{Modal homotopy type theory: The prospect of a new logic for philosophy}. Oxford University Press.
+
+\bibitem{davidson1980}
+Davidson, D. (1980). The logical form of action sentences. In \textit{Essays on actions and events} (pp.~105--122). Oxford University Press.
+
+\bibitem{gratzer-weinberger-buchholtz2024}
+Gratzer, D., Weinberger, J., \& Buchholtz, U. (2024). Directed univalence in simplicial homotopy type theory. \textit{arXiv:2407.09146}.
+
+\bibitem{hottbook}
+Univalent Foundations Program. (2013). \textit{Homotopy type theory: Univalent foundations of mathematics}. Institute for Advanced Study.
+
+\bibitem{lacan1945}
+Lacan, J. (1966). Logical time and the assertion of anticipated certainty. In \textit{\'{E}crits} (B.~Fink, Trans., pp.~161--175). Norton. (Original work published 1945)
+
+\bibitem{papathanasiou2026c}
+Papathanasiou, V. (2026a). Sexual difference as universe stratification: A machine-checked homotopy type-theoretic formalization of Lacan's formulas of sexuation. Manuscript.
+
+\bibitem{papathanasiou2026d}
+Papathanasiou, V. (2026b). Logical time as universe lifting: A homotopy type-theoretic formalization of Lacan's three moments of subjective temporality. Manuscript.
+
+\bibitem{riehl-shulman2017}
+Riehl, E., \& Shulman, M. (2017). A type theory for synthetic $\infty$-categories. \textit{Higher Structures}, 1(1), 147--224. \url{https://arxiv.org/abs/1705.07442}
+
+\bibitem{shulman2018}
+Shulman, M. (2018). Brouwer's fixed-point theorem in real-cohesive homotopy type theory. \textit{Mathematical Structures in Computer Science}, 28(6), 856--941.
+
+\end{thebibliography}
+
+\end{document}

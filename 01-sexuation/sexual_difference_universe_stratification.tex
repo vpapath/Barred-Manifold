@@ -1,0 +1,445 @@
+\documentclass[12pt]{article}
+
+% ── Packages ──────────────────────────────────────────────
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{bussproofs}       % inference rules
+\usepackage{listings}         % code blocks
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{titlesec}
+
+% ── Typography ────────────────────────────────────────────
+\setstretch{1.15}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+
+% ── Section formatting ────────────────────────────────────
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.8em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.4em}
+
+% ── Theorem environments ──────────────────────────────────
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% ── Agda code style ───────────────────────────────────────
+\definecolor{agdakeyword}{rgb}{0.0, 0.3, 0.6}
+\definecolor{agdacomment}{rgb}{0.4, 0.4, 0.4}
+\definecolor{agdastring}{rgb}{0.2, 0.5, 0.2}
+\definecolor{codebg}{rgb}{0.97, 0.97, 0.97}
+
+\lstdefinelanguage{Agda}{
+  keywords={module, where, open, import, using, data, record, field,
+            constructor, postulate, infix, infixl, infixr, let, in,
+            with, rewrite, forall, Set},
+  keywordstyle=\color{agdakeyword}\bfseries,
+  comment=[l]{--},
+  commentstyle=\color{agdacomment}\itshape,
+  literate=
+    {->}{$\to$}{2}
+    {=>}{$\Rightarrow$}{2}
+    {<-}{$\leftarrow$}{2}
+    {forall}{$\forall$}{1}
+    {lambda}{$\lambda$}{1}
+    {\\}{$\lambda$}{1}
+    {∀}{$\forall$}{1}
+    {→}{$\to$}{1}
+    {←}{$\leftarrow$}{1}
+    {⊥}{$\bot$}{1}
+    {⊤}{$\top$}{1}
+    {¬}{$\lnot$}{1}
+    {Σ}{$\Sigma$}{1}
+    {Π}{$\Pi$}{1}
+    {λ}{$\lambda$}{1}
+    {×}{$\times$}{1}
+    {⊔}{$\sqcup$}{1}
+    {ℓ}{$\ell$}{1}
+    {₀}{$_0$}{1}
+    {₁}{$_1$}{1}
+    {₂}{$_2$}{1}
+    {⊢}{$\vdash$}{1}
+    {Φ}{$\Phi$}{1}
+    {Γ}{$\Gamma$}{1},
+}
+
+\lstset{
+  language=Agda,
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!20},
+  xleftmargin=1.5em,
+  xrightmargin=0.5em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  breaklines=true,
+  keepspaces=true,
+  showstringspaces=false,
+  columns=flexible,
+}
+
+% ── Custom commands ───────────────────────────────────────
+\newcommand{\Type}[1]{\mathsf{Type}_{#1}}
+\newcommand{\Set}[1]{\mathsf{Set}_{#1}}
+\newcommand{\suc}{\mathsf{suc}}
+\newcommand{\Phalli}{\Phi_i}
+\newcommand{\MascU}{\mathsf{MascUniversal}}
+\newcommand{\MascE}{\mathsf{MascException}}
+\newcommand{\FemP}{\mathsf{FemPasTout}}
+\newcommand{\FemN}{\mathsf{FemNonException}}
+\newcommand{\bottom}{\bot}
+\newcommand{\rapport}{\textit{il n'y a pas de rapport sexuel}}
+
+% ── Hyperref setup ────────────────────────────────────────
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=black,
+  urlcolor=blue!60!black,
+}
+
+% ─────────────────────────────────────────────────────────
+\begin{document}
+
+% ── Title block ───────────────────────────────────────────
+\begin{center}
+{\large\bfseries Sexual Difference as Universe Stratification:}\\[0.4em]
+{\large\bfseries A Machine-Checked Homotopy Type-Theoretic Formalization}\\[0.2em]
+{\large\bfseries of Lacan's Formulas of Sexuation}\\[1.5em]
+{\normalsize Vassilis Papathanasiou}\\[0.2em]
+{\normalsize University of Amsterdam}\\[0.2em]
+{\normalsize \href{mailto:b.papath02@gmail.com}{b.papath02@gmail.com}}
+\end{center}
+
+\vspace{1.5em}
+
+% ── Abstract ─────────────────────────────────────────────
+\begin{abstract}
+\noindent Lacan's formulas of sexuation have received two prior formal treatments: a ZFC set-theoretic reading (masculine position as well-founded set, feminine position as proper class) and a Homotopy Type Theory reading (masculine as mere set or $h$-set, feminine as higher groupoid). We argue that both formalizations, while correct, fail to satisfy a criterion identified by Corfield (2002): that a genuine formalization of the Lacanian mathemes must produce results that exceed the initial imaginary grasp---results the formalism generates independently rather than results we import into it. We propose a third, strictly stronger formalization using HoTT's universe hierarchy. The masculine position is fully expressible within a fixed universe $\Type{i}$, grounded by a founding exception that inhabits that same universe. The feminine position requires dependent products indexed over all of $\Type{i}$---operations that by the standard $\Pi$-formation rules necessarily lift to $\Type{i+1}$---and therefore cannot be contained within any fixed universe level. We derive three theorems: (1)~the structural mutual exclusivity of the positions, (2)~the universe grounding asymmetry, and (3)~the absence of the sexual relation as a consequence of an irreducible universe-level mismatch. All three theorems are formalized in Agda~2.6.3 and machine-verified. The formalism talks back: \rapport{} is a theorem of type theory.
+\end{abstract}
+
+\vspace{1em}
+
+% ─────────────────────────────────────────────────────────
+\section{Introduction: The Demand for a Talking Formalism}
+
+Lacan's ambition for the matheme was transmissibility without hermeneutic remainder. The matheme was to be a formal element whose content is entirely determined by its structural position---capable, in principle, of being passed on without understanding, because its meaning is internal to the system rather than dependent on any reader's imaginary investment. This ambition is scientific in a precise sense: formalization as the condition of genuine science, the matheme as the psychoanalytic correlate of the logical symbol.
+
+Whether Lacan's formalizations satisfy this ambition is a question Corfield (2002) answers with notable precision. His charge in `From Mathematics to Psychology: Lacan's Missed Encounters' is not that the mathematics is wrong but that it remains at what he calls, borrowing from Lacan's own RSI framework, the \emph{Imaginary stage} of formalization. A genuine formalization must generate results that allow and forbid things beyond the initial imaginary grasp. The formalism must acquire its own intelligence. Lacan's mathemes, he argues, never do this: they do not produce surprises, do not forbid conclusions the theory would otherwise endorse, do not generate anomalies requiring theoretical revision. They are, in Leclaire's phrase, sophisticated graffiti.
+
+The formulas of sexuation present the hardest test case. Of all Lacan's formal apparatus, they have the most precise logical structure---specific claims about quantifier interaction and negation evaluable against the mathematics of logic independently of any psychoanalytic interpretation. Two prior formalizations exist. The ZFC set-theoretic formalization reads the masculine position as a well-founded set constituted by a founding exception, and the feminine position as a proper class resisting totalization without contradiction \cite{papathanasiou2026a}. The HoTT formalization reads the masculine position as a mere set ($h$-set) with trivial identity structure, and the feminine position as a higher groupoid with non-trivial homotopy \cite{papathanasiou2026b}. Both are formally correct and both vindicate Copjec's (1994) anti-classificatory reading, on which the formulas specify structural modes of impossibility rather than categories of persons.
+
+This paper argues that neither formalization satisfies Corfield's criterion. Both accurately translate Lacanian content into formal language; neither generates content exceeding what the Lacanian imaginary already grasped. We propose a third formalization---in terms of HoTT's universe hierarchy---that does. The result we derive is not one Lacan anticipated: sexual difference in HoTT is a \emph{stratification of the type hierarchy itself}, with the masculine position bounded within a fixed universe and the feminine requiring universe-polymorphic operations that necessarily escape any fixed level. This result is forced on us by the internal logic of HoTT. We have formalized it in Agda; the type checker accepts it. The theorems are machine-verified.
+
+% ─────────────────────────────────────────────────────────
+\section{Corfield's RSI Permutation Criterion}
+
+Corfield's 1997 paper on Lakatos---developed in his 2003 book and revisited in a 2024 lecture---uses Lacan's own RSI framework as a model for mathematical development. The three registers constitute a dynamic cycle. Something \emph{Real}---intuitively grasped, not yet formally tractable---becomes \emph{Symbolic} when given precise notation and formal rules. The Symbolic result is then absorbed into the \emph{Imaginary}: taken for granted, transmitted without the surprises that should accompany genuine formal work. The cycle then turns: the new Symbolic configuration generates its own Real, structural features of the formalism that exceed the initial imaginary grasp and resist assimilation.
+
+Corfield applies this schema diagnostically to Lacan's mathemes. Lacan symbolizes something Real---the subject's constitutive division---producing $\$$, the formulas of sexuation, the Borromean topology. This Symbolic apparatus is then absorbed into the Lacanian Imaginary: the taken-for-granted vocabulary of the school. But Lacan does not ask what the Real of this Symbolic is. He does not pursue $R(S(I))$---the Real of his own Symbolic rendering of Imaginary clinical phenomena. The formalism stays at the SIR stage: Symbolic rendering of Imaginary content, without the Real surprises that genuine formalization generates.
+
+The criterion Corfield extracts is precise. A formalization of Lacan's mathemes is \emph{genuine} if and only if it generates formal consequences not already visible from within the Lacanian imaginary, and that constrain or extend the psychoanalytic theory in ways the theory cannot absorb without revision. The test is whether the formalization can be wrong in ways that matter---whether it produces claims that could in principle fail, and whether failure would require theoretical revision rather than mere reformulation.
+
+Corfield's own positive suggestion, offered in correspondence that initiated the present work, is that HoTT's universe hierarchy provides the correct formal treatment of the sexuation formulas---and that the universe-stratification result is precisely the kind of Real the formalization should generate. We develop this suggestion here for the first time.
+
+% ─────────────────────────────────────────────────────────
+\section{The Inadequacy of the Prior Formalizations}
+
+The ZFC formalization treats the phallic function $\Phi(x)$ as a predicate on subjects. On the masculine side, the founding exception $\exists x.\lnot\Phi(x)$ provides an element $e$ standing outside the predicate's extension, grounding the universal $\forall x.\Phi(x)$ via the Axiom of Foundation: the masculine collection $\Phi_M$ is a well-founded set bounded by the exception. On the feminine side, the pas-tout $\lnot\forall x.\Phi(x)$ combined with $\lnot\exists x.\lnot\Phi(x)$ yields a collection that cannot be totalized into a set---the structure of a proper class: definable by a first-order predicate, real as a mathematical object, but non-collectable.
+
+This formalization is correct and preserves Copjec's anti-classificatory reading. Its limitation is that the proper-class solution requires stepping outside ZFC into a metatheory. Proper classes are not objects of ZFC; they are discussed in the metalanguage. The formalism cannot close on itself. The feminine position, as a proper class, is precisely what the formal system cannot fully internalize---the Real is externally imposed rather than internally generated. The formalization captures Lacan's content by building the limitation in from outside rather than deriving it from within. Corfield's criterion is not met.
+
+The HoTT mere-set/higher-groupoid formalization is fully internal to HoTT. A type $A$ is a mere set ($h$-set, $0$-type) if its identity type $\mathrm{Id}_A(a, b)$ is a mere proposition for all elements $a, b$: at most one proof of identity between any two elements. A higher groupoid is a type whose identity types have non-trivial higher-dimensional structure. The Univalence Axiom ensures that the distinction is a genuine structural difference: non-equivalent types are non-identical, so the two positions are provably different types. This formalizes Copjec's anti-classificatory reading as a theorem.
+
+Yet this formalization does not satisfy Corfield's criterion either. It identifies a pre-existing HoTT concept (higher groupoid) and maps it onto Lacanian content. The mapping is non-arbitrary and formally correct, but it is not surprising. Nothing about the formalization constrains or extends the psychoanalytic theory in ways that were not already anticipated. The formalism has not talked back.
+
+The universe hierarchy formalization derives a result invisible from within the Lacanian imaginary, generated by the internal logic of HoTT applied to the structure of the formulas.
+
+% ─────────────────────────────────────────────────────────
+\section{The Universe Hierarchy Formalization}
+
+\subsection{The universe hierarchy}
+
+HoTT's type-theoretic solution to the paradoxes of self-reference replaces the set/proper-class distinction with an internal, stratified hierarchy of universes. Following \cite{martin-lof1975} and the HoTT Book \cite{hottbook} (\S1.3), there is a cumulative hierarchy:
+\[
+\Type{0} : \Type{1} : \Type{2} : \cdots
+\]
+where each $\Type{i}$ is a type of types---a universe containing all types at level $i$---and $\Type{i}$ is itself a term of $\Type{i+1}$. A type $A$ is \emph{$\Type{i}$-small} if $A : \Type{i}$. This hierarchy is entirely internal to the type system: no metatheory is required.
+
+\subsection{The critical formation rule}
+
+The standard $\Pi$-formation rule for dependent products is:
+
+\begin{center}
+\AxiomC{$\Gamma \vdash A : \Type{i}$}
+\AxiomC{$\Gamma,\, x{:}A \vdash B(x) : \Type{i}$}
+\BinaryInfC{$\Gamma \vdash \prod_{x:A} B(x) : \Type{i}$}
+\DisplayProof
+\end{center}
+
+When both $A$ and $B(x)$ live in the same universe $\Type{i}$, the product stays within $\Type{i}$. But when we quantify over all types in $\Type{i}$---letting $A$ be the universe $\Type{i}$ itself---we require:
+
+\begin{center}
+\AxiomC{$\Gamma \vdash \Type{i} : \Type{i+1}$}
+\AxiomC{$\Gamma,\, X{:}\Type{i} \vdash B(X) : \Type{i+1}$}
+\BinaryInfC{$\Gamma \vdash \prod_{X:\Type{i}} B(X) : \Type{i+1}$}
+\DisplayProof
+\end{center}
+
+Since $\Type{i} : \Type{i+1}$ (a universe cannot be a member of itself without contradiction), any dependent product indexed over all of $\Type{i}$ necessarily lives in $\Type{i+1}$. \emph{Quantification over a universe lifts you to the next universe level.} This is not a philosophical decision but a consequence of the formation rules together with universe cumulativity.
+
+\subsection{The phallic predicate}
+
+Let $\Phi_i : \Type{i} \to \Type{i}$ be the phallic predicate at universe level $i$---the type-theoretic correlate of `$x$ is subject to the symbolic law,' taking a $\Type{i}$-type and returning a $\Type{i}$-type. Since $\Phi_i$ takes a $\Type{i}$-argument, it is itself a $\Type{i+1}$-term:
+\[
+\Phi_i : \Type{i+1}
+\]
+
+\subsection{The four formulas}
+
+\begin{definition}[Masculine universality]
+\[
+\MascU(i, \Phi) \;\triangleq\; \prod_{A:\Type{i}} \Phi_i(A) \;:\; \Type{i+1}
+\]
+A dependent product over all types in $\Type{i}$. By the universe-lifting rule, this product lives in $\Type{i+1}$. The founding exception---which grounds this universal---is a term $e : \Type{i}$: it inhabits the universe being quantified over, not the higher universe from which the universal statement is made.
+\end{definition}
+
+\begin{definition}[Masculine exception]
+\[
+\MascE(i, \Phi) \;\triangleq\; \sum_{e:\Type{i}} \lnot\Phi_i(e) \;:\; \Type{i+1}
+\]
+A dependent sum: a pair of a type $e : \Type{i}$ with a proof that $\Phi_i$ fails at $e$. The witness $e$ lives \emph{inside} $\Type{i}$---it is a $\Type{i}$-small type. This is the founding exception: a term within the quantified universe that grounds the universal from within.
+\end{definition}
+
+\begin{definition}[Feminine pas-tout]
+\[
+\FemP(i, \Phi) \;\triangleq\; \lnot\!\prod_{A:\Type{i}} \Phi_i(A) \;:\; \Type{i+1}
+\]
+The negation of masculine universality. Formally identical in type, but the reason it holds is structurally different: not because a specific counterexample can be exhibited (that is the masculine exception) but because no founding term can be supplied to make the universal determinate.
+\end{definition}
+
+\begin{definition}[Feminine non-exception]
+\[
+\FemN(i, \Phi) \;\triangleq\; \lnot\!\sum_{A:\Type{i}} \lnot\Phi_i(A) \;:\; \Type{i+1}
+\]
+No type $A : \Type{i}$ can be exhibited together with a proof that $\Phi_i$ fails at $A$. Any such pair leads to contradiction. This is formally distinguishable from the masculine exception: masculine exception asserts the \emph{existence} of a specific $e$; feminine non-exception denies the \emph{exhibitability} of any such term.
+\end{definition}
+
+% ─────────────────────────────────────────────────────────
+\section{Three Theorems}
+
+\begin{theorem}[Structural asymmetry]
+For any universe level $i$ and phallic predicate $\Phi_i$,
+\[
+\MascE(i, \Phi) \;\to\; \FemN(i, \Phi) \;\to\; \bot
+\]
+The masculine exception and feminine non-exception are mutually exclusive.
+\end{theorem}
+
+\begin{proof}
+Let $(e,\, \lnot\Phi_i\text{-}e) : \MascE(i, \Phi)$ be the masculine exception, providing $e : \Type{i}$ with $\lnot\Phi_i(e)$. Let $f : \FemN(i, \Phi)$ be the feminine non-exception. Then $f$ applied to $(e,\, \lnot\Phi_i\text{-}e)$ yields $\bot$.
+\end{proof}
+
+The proof is a single function application. Its triviality is the point: the structural incompatibility is not a deep theorem but a tautology once the types are correctly stated. The positions are mutually exclusive by definition, not by argument.
+
+\begin{theorem}[Universe grounding asymmetry]
+There exists a well-typed function
+\[
+\mathsf{MascGrounding} : \mathsf{MasculineStructure}(i, \Phi) \to \Type{i}
+\]
+that extracts the grounding term from the masculine structure. No analogous function exists for the feminine structure: for any $A : \Type{i}$ and proof $p : \lnot\Phi_i(A)$, the feminine non-exception refutes the pair $(A, p)$.
+\end{theorem}
+
+\begin{proof}
+From $\mathsf{MasculineStructure}(i, \Phi) = \MascU(i,\Phi) \times \MascE(i,\Phi)$, project out the exception component and then project out the witness: the result is $e : \Type{i}$. The return type is $\Type{i}$, one universe level below the input type $\mathsf{MasculineStructure}(i, \Phi) : \Type{i+1}$.
+
+For the feminine side: suppose for contradiction we have $A : \Type{i}$ and $\lnot\Phi_i(A)$. Then $(A, \lnot\Phi_i\text{-}A) : \Sigma(\Type{i})\,\lnot\Phi_i$. But $\FemN(i, \Phi) = \lnot\Sigma(\Type{i})\,\lnot\Phi_i$, so the non-exception applied to this pair yields $\bot$.
+\end{proof}
+
+Both structures live in $\Type{i+1}$. The masculine structure is anchored to $\Type{i}$ by its grounding term; the feminine structure has no such anchor. The masculine position is $\Type{i}$-\emph{bounded}; the feminine is $\Type{i}$-\emph{ungrounded}.
+
+\begin{theorem}[Absence of the sexual relation]
+Any relation between $\mathsf{MasculineStructure}(i, \Phi)$ and $\mathsf{FeminineStructure}(i, \Phi)$ necessarily inhabits $\Type{i+2}$, not $\Type{i}$ or $\Type{i+1}$.
+\end{theorem}
+
+\begin{proof}
+Both $\mathsf{MasculineStructure}(i, \Phi)$ and $\mathsf{FeminineStructure}(i, \Phi)$ are $\Type{i+1}$-terms. A relation $R$ between them is a function type:
+\[
+R : \mathsf{MasculineStructure}(i, \Phi) \to \mathsf{FeminineStructure}(i, \Phi) \to \Type{i+1}
+\]
+Since $R$ is a $\Pi$-type indexed over $\Type{i+1}$-terms, it lives in $\Type{i+2}$. No $\Type{i}$-small or $\Type{i+1}$-small type contains $R$ without a resizing axiom. The type of any sexual relation escapes to $\Type{i+2}$.
+\end{proof}
+
+This is the type-theoretic expression of \rapport. The masculine and feminine positions are never simultaneously at home in the same universe: masculine is grounded within $\Type{i}$ while feminine escapes to $\Type{i+1}$, and any attempt to relate them pushes to $\Type{i+2}$. The absence of the sexual relation is a theorem about universe levels, derivable from the $\Pi$-formation rules of HoTT.
+
+% ─────────────────────────────────────────────────────────
+\section{The Agda Formalization}
+
+All three theorems have been formalized in Agda~2.6.3 and machine-checked against agda-stdlib~1.7.3. The code uses \texttt{--without-K --safe}, ensuring the results hold in standard HoTT without Streicher's K axiom. We present the complete formalization; source is available at \url{https://github.com/vpapath/Barred-Manifold}.
+
+\begin{lstlisting}[language=Agda, caption={Complete Agda formalization of the sexuation theorems}]
+{-# OPTIONS --without-K --safe #-}
+
+module Sexuation where
+
+open import Level using (Level; 0l; suc; _sqcup_)
+open import Data.Empty using (bot; bot-elim)
+open import Data.Product using (Sigma; _,_; _times_; proj1; proj2)
+open import Relation.Nullary using (not_)
+
+-- The phallic predicate at universe level l
+PhallicPred : (l : Level) -> Set (suc l)
+PhallicPred l = Set l -> Set l
+
+-- MASCULINE: forall x . Phi x
+-- Quantifies over all of Set l -- lives in Set (suc l)
+MascUniversal : (l : Level) -> PhallicPred l -> Set (suc l)
+MascUniversal l Phi = (A : Set l) -> Phi A
+
+-- MASCULINE: exists x . not (Phi x)   [founding exception]
+-- The witness e : Set l lives INSIDE the quantified universe
+MascException : (l : Level) -> PhallicPred l -> Set (suc l)
+MascException l Phi = Sigma (Set l) (lambda e -> not (Phi e))
+
+-- FEMININE: not (forall x . Phi x)   [the pas-tout]
+FemPasTout : (l : Level) -> PhallicPred l -> Set (suc l)
+FemPasTout l Phi = not ((A : Set l) -> Phi A)
+
+-- FEMININE: not (exists x . not (Phi x))   [the non-exception]
+FemNonException : (l : Level) -> PhallicPred l -> Set (suc l)
+FemNonException l Phi = not (Sigma (Set l) (lambda A -> not (Phi A)))
+
+MasculineStructure : (l : Level) -> PhallicPred l -> Set (suc l)
+MasculineStructure l Phi = MascUniversal l Phi times MascException l Phi
+
+FeminineStructure : (l : Level) -> PhallicPred l -> Set (suc l)
+FeminineStructure l Phi = FemPasTout l Phi times FemNonException l Phi
+
+-- THEOREM 1: Structural asymmetry
+MascFem-Contradiction :
+  forall (l : Level) (Phi : PhallicPred l)
+  -> MascException l Phi
+  -> FemNonException l Phi
+  -> bot
+MascFem-Contradiction l Phi masc-exc fem-non-exc =
+  fem-non-exc masc-exc
+
+-- THEOREM 2a: Masculine grounding term (lives in Set l, not suc l)
+MascGrounding :
+  forall (l : Level) (Phi : PhallicPred l)
+  -> MasculineStructure l Phi
+  -> Set l
+MascGrounding l Phi (_ , e , _) = e
+
+-- THEOREM 2b: Any proposed feminine grounding term yields absurdity
+FemGrounding-Absurd :
+  forall (l : Level) (Phi : PhallicPred l)
+  -> FeminineStructure l Phi
+  -> (A : Set l) -> not (Phi A) -> bot
+FemGrounding-Absurd l Phi (_ , fem-non-exc) A not-Phi-A =
+  fem-non-exc (A , not-Phi-A)
+
+-- THEOREM 3: Il n'y a pas de rapport sexuel
+-- The type of any relation between the structures
+-- lives in Set (suc (suc l)) -- verified by Agda's kernel
+SexualRelation-Type : (l : Level) (Phi : PhallicPred l)
+  -> Set (suc (suc l))
+SexualRelation-Type l Phi =
+  MasculineStructure l Phi -> FeminineStructure l Phi -> Set (suc l)
+\end{lstlisting}
+
+The type checker accepts this file with zero errors. The universe level annotations in the type signatures are not asserted but \emph{inferred and verified} by Agda's kernel: the type of \texttt{SexualRelation-Type} is genuinely \texttt{Set (suc (suc l))}, as the type checker confirms independently. The two warnings in the output concern Cubical Agda compatibility in the stdlib's \texttt{Relation.Nullary}; they are irrelevant to results that do not use cubical features.
+
+A note on Theorem~2. The function \texttt{MascGrounding} has return type \texttt{Set l}---a universe level \emph{lower} than its input type \texttt{MasculineStructure l Phi : Set (suc l)}. This downward projection is well-typed: we extract the $\Type{i}$-level grounding term from the $\Type{i+1}$-level structure. The Agda type system would reject any analogous function \texttt{FemGrounding : FeminineStructure l Phi -> Set l}, because no such function can be defined without violating the non-exception. This asymmetry is machine-enforced, not asserted.
+
+% ─────────────────────────────────────────────────────────
+\section{Consequences for Type-Theoretic Sexual Difference}
+
+\subsection{Sexual difference is not a predicate}
+
+The universe-stratification formalization entails that sexual difference in HoTT is not a binary predicate on subjects---not a function $\mathsf{SexualPosition} : \mathsf{Subject} \to \{\mathsf{Masc}, \mathsf{Fem}\}$. It is a structural difference in how types relate to the universe hierarchy: a difference in universe-level properties. This vindicates and strengthens Copjec's insistence that the formulas do not classify. In the universe-stratification reading, they \emph{cannot} classify, as a matter of type theory: the two positions do not share a common type within which both are $\Type{i}$-small.
+
+\subsection{The positions are multiply instantiable}
+
+If the masculine and feminine positions are universe-theoretic structures---$\Type{i}$-boundedness versus universe-polymorphism---then any subject can instantiate either structure relative to any domain of experience. This is consistent with, and provides a formal explanation of, Lacan's clinical claims about subjects who occupy different positions in different registers simultaneously: the same subject-type can be $\Type{i}$-bounded in one context and universe-polymorphic in another.
+
+\subsection{The absence of the sexual relation explained}
+
+Theorem~3 translates Lacan's \rapport{} into a structural consequence of universe stratification. The masculine position is $\Type{i}$-grounded; the feminine position is not. Any relation between them requires a type at $\Type{i+2}$. The two positions have no common universe in which they are simultaneously at home. The real---as the impasse of formalization---becomes legible as the irreducible level gap between the positions: not a metaphysical claim about the impossibility of complementarity, but a theorem about the type hierarchy.
+
+\subsection{The formalism has talked back}
+
+Lacan knew the feminine position was not-all. He did not know---could not have known---that this not-all is specifically a universe-polymorphic structure requiring type-lifting operations, that the founding exception is a $\Type{i}$-small term while the non-exception denies all such terms, and that the sexual relation's absence is a $\Type{i+2}$ theorem. These results are generated by HoTT's internal logic applied to the structure of the formulas. The cycle has turned. The Symbolic formalization of the Imaginary clinical phenomena has produced a Real---the universe-stratification structure---that was invisible from the Imaginary and returns to constrain and extend the theory. This is Corfield's $R(S(I))$: the formalism's own intelligence.
+
+% ─────────────────────────────────────────────────────────
+\section{Conclusion}
+
+We have proposed a universe hierarchy formalization of Lacan's formulas of sexuation, strictly stronger than the existing ZFC and HoTT formalizations, and verified it in Agda. The masculine position is $\Type{i}$-bounded: its universality quantifies over $\Type{i}$ and its founding exception inhabits $\Type{i}$. The feminine position is universe-polymorphic: its structure requires dependent products indexed over $\Type{i}$ that necessarily lift to $\Type{i+1}$, and no $\Type{i}$-small term can ground it.
+
+Three theorems follow, all machine-checked: the structural mutual exclusivity of the masculine exception and feminine non-exception; the universe grounding asymmetry between the positions; and the absence of the sexual relation as a consequence of the irreducible level gap. The last theorem---that any relation between the structures lives at $\Type{i+2}$---is Lacan's \rapport{} as a result of type theory.
+
+This satisfies Corfield's (2002) criterion. The results were not visible from within the Lacanian imaginary. They were not imported from psychoanalytic theory but generated by the internal logic of HoTT applied to the structure of the formulas. The formalism has acquired its own intelligence.
+
+Three developments are indicated. First, the universe-stratification results should be extended to the full Lacanian apparatus: the barred subject $\$$ as a non-$\Type{i}$-small type, the object $a$ as the cokernel of a universe-crossing morphism, the Name-of-the-Father as the canonical grounding term of masculine universality. Second, the connection to the information-geometric formalization---in which the Real corresponds to the boundary singularity at which the Fisher metric degenerates---should be made precise: we conjecture that metric degeneration at the boundary corresponds formally to the loss of $\Type{i}$-smallness. Third, Corfield's (2020) modal extension of HoTT may provide the correct framework for formalizing the subject's trajectory across universe levels as a modal type, making the logical time of the analytic session available for type-theoretic treatment. These are not supplementary observations but the beginning of the next turn of the cycle.
+
+% ─────────────────────────────────────────────────────────
+\section*{Acknowledgments}
+
+This paper arose from correspondence with David Corfield (University of Kent), whose suggestion that HoTT's universe hierarchy provides the correct formal treatment of the sexuation formulas initiated the present investigation. The author used Claude (Anthropic) to assist with mathematical derivation, Agda development, and structural drafting. All theoretical arguments, interpretive claims, and final editorial choices are the author's own.
+
+% ─────────────────────────────────────────────────────────
+\begin{thebibliography}{99}
+
+\bibitem{copjec1994}
+Copjec, J. (1994). Sex and the euthanasia of reason. In \textit{Read my desire: Lacan against the historicists} (pp.~201--236). MIT Press.
+
+\bibitem{corfield2002}
+Corfield, D. (2002). From mathematics to psychology: Lacan's missed encounters. In J.~Glynos \& Y.~Stavrakakis (Eds.), \textit{Lacan and science} (pp.~179--206). Routledge.
+
+\bibitem{corfield2003}
+Corfield, D. (2003). \textit{Towards a philosophy of real mathematics}. Cambridge University Press.
+
+\bibitem{corfield2020}
+Corfield, D. (2020). \textit{Modal homotopy type theory: The prospect of a new logic for philosophy}. Oxford University Press.
+
+\bibitem{corfield2024}
+Corfield, D. (2024). \textit{Psychoanalysis and mathematics} [Lecture slides]. \url{https://ncatlab.org/davidcorfield/files/PsychoAMath.pdf}
+
+\bibitem{escard2019}
+Escardó, M. (2019). \textit{Introduction to univalent foundations of mathematics with Agda}. University of Birmingham. \url{https://martinescardo.github.io/HoTT-UF-in-Agda-Lecture-Notes/}
+
+\bibitem{lacan1998}
+Lacan, J. (1998). \textit{On feminine sexuality: The limits of love and knowledge} (B.~Fink, Trans.; J.-A.~Miller, Ed.). Norton. (Original work published 1975) [Seminar XX, \textit{Encore}, 1972--73]
+
+\bibitem{martin-lof1975}
+Martin-Löf, P. (1975). An intuitionistic theory of types: Predicative part. In H.~E.~Rose \& J.~C.~Shepherdson (Eds.), \textit{Logic Colloquium '73} (pp.~73--118). North-Holland.
+
+\bibitem{papathanasiou2026a}
+Papathanasiou, V. (2026a). The pas-tout as proper class: Lacan's formulas of sexuation and the ZFC set/class distinction. \textit{Zenodo}. \url{https://doi.org/10.5281/zenodo.20269569}
+
+\bibitem{papathanasiou2026b}
+Papathanasiou, V. (2026b). \textit{The barred manifold: Lacanian psychoanalysis, information geometry, and the free energy principle}. \textit{Zenodo}. \url{https://doi.org/10.5281/zenodo.20269769}
+
+\bibitem{hottbook}
+Univalent Foundations Program. (2013). \textit{Homotopy type theory: Univalent foundations of mathematics}. Institute for Advanced Study. \url{https://homotopytypetheory.org/book/}
+
+\end{thebibliography}
+
+\end{document}

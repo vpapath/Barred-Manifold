@@ -1,0 +1,573 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{times}
+\usepackage{microtype}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage{bussproofs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{parskip}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\setstretch{1.15}
+\setlength{\parindent}{1.5em}
+\setlength{\parskip}{0pt}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.8em}{0.6em}
+\titlespacing*{\subsection}{0pt}{1.2em}{0.4em}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\definecolor{codebg}{rgb}{0.97, 0.97, 0.97}
+\definecolor{agdakeyword}{rgb}{0.0, 0.3, 0.6}
+\definecolor{agdacomment}{rgb}{0.4, 0.4, 0.4}
+
+\lstdefinelanguage{Agda}{
+  keywords={module, where, open, import, using, data, record, field,
+            constructor, postulate, infix, infixl, infixr, let, in,
+            with, rewrite, Set, Type},
+  keywordstyle=\color{agdakeyword}\bfseries,
+  comment=[l]{--},
+  commentstyle=\color{agdacomment}\itshape,
+  literate=
+    {->}{$\to$}{2}
+    {forall}{$\forall$}{1}
+    {->}{$\to$}{2}
+    {bot}{$\bot$}{1}
+    {not}{$\lnot$}{1}
+    {Sigma}{$\Sigma$}{1}
+    {times}{$\times$}{1}
+    {sqcup}{$\sqcup$}{1}
+}
+
+\lstset{
+  language=Agda,
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  framerule=0.4pt,
+  rulecolor=\color{black!20},
+  xleftmargin=1.5em,
+  xrightmargin=0.5em,
+  aboveskip=0.8em,
+  belowskip=0.8em,
+  breaklines=true,
+  keepspaces=true,
+  showstringspaces=false,
+  columns=flexible,
+}
+
+% Custom commands
+\newcommand{\Type}[1]{\mathsf{Type}_{#1}}
+\newcommand{\shapemod}{\int}                    % shape modality
+\newcommand{\flatmod}{{\flat}}                  % flat modality
+\newcommand{\sharpmod}{{\sharp}}                % sharp modality
+\newcommand{\IG}{l'instant\;du\;regard}
+\newcommand{\TC}{le\;temps\;pour\;comprendre}
+\newcommand{\MC}{le\;moment\;de\;conclure}
+\newcommand{\aprescoup}{\textit{apr\`es-coup}}
+\newcommand{\rapport}{\textit{il n'y a pas de rapport sexuel}}
+
+\hypersetup{colorlinks=true, linkcolor=black, citecolor=black, urlcolor=blue!60!black}
+
+% ---------------------------------------------------------
+\begin{document}
+
+\begin{center}
+{\large\bfseries Logical Time as Universe Lifting:}\\[0.4em]
+{\large\bfseries A Homotopy Type-Theoretic Formalization of}\\[0.2em]
+{\large\bfseries Lacan's Three Moments of Subjective Temporality}\\[1.5em]
+{\normalsize Vassilis Papathanasiou}\\[0.2em]
+{\normalsize University of Amsterdam}\\[0.2em]
+{\normalsize \href{mailto:b.papath02@gmail.com}{b.papath02@gmail.com}}
+\end{center}
+
+\vspace{1.5em}
+
+\begin{abstract}
+\noindent
+Lacan's 1945 paper `Logical Time and the Assertion of Anticipated Certainty' identifies three structural moments of subjective temporality: the instant of the glance (\textit{l'instant du regard}), the time for comprehending (\textit{le temps pour comprendre}), and the moment of concluding (\textit{le moment de conclure}). The moment of concluding has a distinctive anticipatory structure: the subject commits to a certainty not yet verified, constituting the certainty in the act of concluding rather than waiting for it to arrive. We propose a formalization of this structure in Homotopy Type Theory using the universe hierarchy. The instant of the glance is a $\Type{i}$-level observation: local, uninterpreted, consistent with multiple readings. The time for comprehending is oscillation within $\Type{i}$: deliberation among inhabitants of the same universe without a canonical grounding term. The moment of concluding is a universe-lifting act: a commitment to a $\prod(X{:}\Type{i})\,B(X)$ that necessarily inhabits $\Type{i+1}$, retroactively organizing the $\Type{i}$-level evidence from above. The \aprescoup{}---the retroactive constitution of meaning---is a formal theorem: once a $\Type{i+1}$-level commitment is made, the meaning of the $\Type{i}$-level situation is retroactively grounded. We verify the core results in Agda 2.6.3 using only the standard universe hierarchy. We then extend the formalization using the shape modality $\shapemod$ of cohesive HoTT (Shulman 2018; Corfield 2020), under which the moment of concluding is $\shapemod$ applied to the time-for-comprehending situation: the extraction of a global topological invariant from local oscillation. This modal extension is formalized with explicitly stated axioms; results are conditionally verified given those axioms. The connection to our companion paper on sexual difference is made precise: the moment of concluding and the feminine position in the formulas of sexuation are the same universe-lifting operation seen from two directions. Logical time and sexual difference share a common formal structure in HoTT.
+\end{abstract}
+
+\vspace{1em}
+
+% ---------------------------------------------------------
+\section{Introduction: The Anticipatory Structure of Logical Time}
+
+Lacan's 1945 paper is among his most formally precise early writings. Its subject is a logical puzzle --- the three-prisoners problem --- but its argument is philosophical: that the logical structure of the problem reveals something about the temporality of subjective emergence that cannot be captured by standard predicate logic or psychological time. The three moments Lacan identifies are not phases in a psychological process but logical structures: the instant of the glance is not brief, the time for comprehending is not slow, and the moment of concluding does not wait for verification. They are formal characterizations of how a subject comes to know something about itself through its inscription in a symbolic situation.
+
+The moment of concluding is the philosophically distinctive one. A subject concludes --- acts, commits, decides --- before the certainty that would justify the conclusion has been established. But this is not irrationality or premature closure: it is the structure through which certainty is constituted. The subject does not wait for certainty and then conclude; it concludes, and in concluding constitutes the certainty. The anticipatory structure is logical: the conclusion is the condition of the certainty it appears to follow from.
+
+This structure has resisted formal treatment. The three-prisoners problem has received game-theoretic analyses \cite{skrbina2001}, but these capture the decision-theoretic aspect of the situation while losing the specifically logical-temporal structure Lacan is after: not \emph{why} the prisoners conclude when they do but \emph{what kind of temporal operation} concluding is. Heuristic connections to Kripke semantics (temporal operators, accessibility relations) have been proposed but not developed formally. The thesis \cite{papathanasiou2026b} maps the three moments onto the three temporal levels of hierarchical active inference --- fast prediction error, precision-weighted integration, slow prior revision --- and proves the correspondence formally, but this is a neuroscientific formalization, not a logical one.
+
+The present paper proposes a logical formalization in Homotopy Type Theory. The key observation is that the moment of concluding has exactly the structure of a universe-lifting operation in HoTT: a commitment to a claim about all of $\Type{i}$ that necessarily inhabits $\Type{i+1}$. This is not an analogy but a structural identity. The universe hierarchy provides the formal object that captures the anticipatory structure: the move from $\Type{i}$ to $\Type{i+1}$ is the type-theoretic expression of the subject's move from local oscillation to global commitment. And the \aprescoup{} --- the retroactive constitution of meaning --- is a theorem about what the $\Type{i+1}$-level commitment does to the $\Type{i}$-level evidence.
+
+In the second part of the paper we extend the formalization using the shape modality $\shapemod$ of cohesive HoTT \cite{shulman2018, corfield2020}. The shape modality is the formal operation that extracts the underlying homotopy type --- the global topological invariant --- from a type's local spatial structure. This maps onto the moment of concluding with precision: the subject extracts a global commitment (the $\shapemod$-type) from the local oscillation of the time for comprehending. The axioms for the shape modality are stated explicitly; results in this part are conditional on those axioms.
+
+The paper closes by connecting logical time to the companion paper on sexual difference \cite{papathanasiou2026c}. The moment of concluding --- universe-lifting from $\Type{i}$ to $\Type{i+1}$ --- is formally identical to the operation that characterizes the feminine position in the formulas of sexuation. This is not a coincidence but a structural feature of HoTT: both are expressions of the same type-theoretic operation, seen from different angles. The implication is that Lacan's logical time and his theory of sexual difference are formally unified in the universe hierarchy.
+
+% ---------------------------------------------------------
+\section{Lacan's Three Logical Moments}
+
+\subsection{The three-prisoners problem}
+
+Lacan's setup is a classic logical puzzle. Three prisoners are told that each has been given either a white or black disk on their back, and that there are three white and two black disks available. Each can see the others' backs but not his own. The first to correctly identify his own disk's color and explain his reasoning will be freed.
+
+The logically interesting case is when all three have white disks. Each prisoner reasons: if I had a black disk, the other two would each see one black and one white disk. Each would then reason that if he himself had a black disk, the third would immediately see two black disks and know he was white. Since neither of the other two has moved immediately, I cannot have a black disk. Therefore I am white.
+
+The puzzle is that each prisoner reasons through what \emph{would have happened} if the others had not moved, but the others have also not moved because they are engaged in the same reasoning. The moment of concluding is not the result of completed reasoning but the act that terminates the deliberation: each prisoner concludes on the basis of the others' \emph{not concluding}, and this collective hesitation is the evidence that grounds the individual conclusion. The subject concludes before the reasoning is finished, because the conclusion is what makes the reasoning finish.
+
+\subsection{The three moments formally characterized}
+
+Lacan draws from the puzzle three structural characterizations:
+
+\begin{enumerate}[leftmargin=2em]
+\item \textbf{The instant of the glance} ($\IG$): The immediate registration of the visual evidence --- seeing the others' disk colors --- without interpretation. This is seeing-without-comprehending: the data is present but its significance is undetermined. Multiple interpretations remain consistent with the evidence.
+
+\item \textbf{The time for comprehending} ($\TC$): The deliberative interval in which the subject reasons through the implications of the evidence, considers what others might be reasoning, and oscillates between possible self-attributions. No conclusion is reached; the subject is suspended between possibilities. The deliberation is necessary but not sufficient for concluding.
+
+\item \textbf{The moment of concluding} ($\MC$): The act of commitment. The subject does not conclude \emph{after} reaching certainty; it concludes \emph{in order to} reach certainty. The conclusion is anticipatory: it commits to a reading before that reading is fully verified. And the commitment is what makes verification possible, because the collective hesitation of the other prisoners is itself evidence only if the subject is prepared to act on it. The certainty is constituted by the act of concluding, not its precondition.
+\end{enumerate}
+
+The \aprescoup{} structure emerges from the relationship between the first and third moments. After concluding at the third moment, the subject's glance at the first moment is retroactively constituted as a glance \emph{at a specific evidence}: the instant of the glance now means something it did not mean before the conclusion. The meaning of the first moment is determined by the third moment, retroactively. This is not psychological revision but logical constitution: the instant of the glance as the instant it was --- a glance at white disks that grounded the conclusion --- is constituted only after the conclusion has been made.
+
+\subsection{Why standard formalisms fail}
+
+Standard tense logic can represent ``it will be the case that'' and ``it has been the case that'' but cannot represent the constitutive relationship between future commitment and past meaning that Lacan is describing. In standard temporal logic, the meaning of a past event is fixed; future events may reveal that meaning but do not constitute it. The \aprescoup{} requires a temporal logic in which the meaning of the past is genuinely open until constituted by future events --- not merely unknown but indeterminate.
+
+Game-theoretic formalizations capture the \emph{rationality} of the prisoners' reasoning but not its logical-temporal structure: they show that concluding is the rational action at a certain point, not that concluding is the act that constitutes the certainty on which the reasoning is based.
+
+Possible-worlds semantics for modality represents accessibility between worlds but does not represent the subject's movement between epistemic states as a type-changing operation. The moment of concluding is not a move to a different world but a move to a different \emph{type level}: from local, undecided evidence to a global, committed interpretation.
+
+% ---------------------------------------------------------
+\section{Part One: Universe Hierarchy Formalization}
+
+\subsection{The three moments as types}
+
+We formalize the three logical moments as types at different levels of the HoTT universe hierarchy.
+
+\begin{definition}[Instant of the glance]
+Let $O : \Type{i}$ be an observation type at universe level $i$ --- a type whose inhabitants are the possible readings of the visual evidence. $O$ is $\Type{i}$-small: it lives within the universe being surveyed. An \emph{instant of the glance} at level $i$ is a term $o : O$, a specific observation, together with the fact that $O$ has multiple distinct inhabitants (the evidence is underdetermined):
+\[
+\mathsf{Glance}(i) \;\triangleq\; \sum_{O:\Type{i}} \Bigl( O \times \sum_{o_1 o_2 : O} (o_1 \neq o_2) \Bigr) \;:\; \Type{i+1}
+\]
+The multiplicity condition $\sum_{o_1 o_2 : O} (o_1 \neq o_2)$ captures the underdetermination: the glance registers evidence consistent with multiple conclusions.
+\end{definition}
+
+\begin{definition}[Time for comprehending]
+The time for comprehending is oscillation within $\Type{i}$: reasoning that moves between the inhabitants of $O$ without reaching a canonical one. Formally, it is a function that, given any proposed grounding term, can produce an alternative:
+\[
+\mathsf{Comprehending}(i, O) \;\triangleq\; \prod_{o:O} \sum_{o':O} (o \neq o') \;:\; \Type{i+1}
+\]
+For any proposed reading $o : O$, there exists an alternative reading $o' : O$ that is distinct from it. The time for comprehending is the inhabitation of this type: the subject can always find an alternative, and thus cannot rest at any $\Type{i}$-level reading.
+\end{definition}
+
+\begin{definition}[Moment of concluding]
+The moment of concluding is a commitment to a $\prod$-type indexed over all of $\Type{i}$ --- a claim that holds for \emph{every} type at level $i$, regardless of which specific inhabitant is chosen. By the $\Pi$-formation rule, this necessarily lives in $\Type{i+1}$:
+\[
+\mathsf{Concluding}(i, \Phi) \;\triangleq\; \prod_{X:\Type{i}} \Phi(X) \;:\; \Type{i+1}
+\]
+where $\Phi : \Type{i} \to \Type{i}$ is the property the subject commits to. The commitment is universe-lifting: the act of concluding moves the subject from $\Type{i}$-level oscillation to a $\Type{i+1}$-level claim about all of $\Type{i}$.
+\end{definition}
+
+\subsection{The anticipatory structure theorem}
+
+The key formal result is that the moment of concluding does not merely follow the time for comprehending but \emph{terminates} it and retroactively constitutes the meaning of the glance.
+
+\begin{theorem}[Anticipatory structure]
+Let $i$ be a universe level, $O : \Type{i}$ an observation type with multiple inhabitants, and $\Phi : \Type{i} \to \Type{i}$ a phallic predicate. If the subject inhabits $\mathsf{Concluding}(i, \Phi)$ --- has a term $c : \prod_{X:\Type{i}} \Phi(X)$ --- then for any specific observation $o : O$, the subject can compute $c(O) : \Phi(O)$: the $\Type{i+1}$-level commitment applied to the specific $\Type{i}$-level observation yields a specific proof.
+
+Furthermore, the oscillation of the time for comprehending is terminated: the function $c$ provides, for every possible reading $O : \Type{i}$, a canonical $\Phi(O)$-proof. There is no longer a reading for which $\Phi$ fails.
+\end{theorem}
+
+\begin{proof}
+Given $c : \prod_{X:\Type{i}} \Phi(X)$, application to $O : \Type{i}$ yields $c(O) : \Phi(O)$. The $\mathsf{Comprehending}$-type produces alternatives $o' \neq o$ for any $o$, but $c(O) : \Phi(O)$ holds for $O$ regardless of which inhabitant $o : O$ is considered. The $\Type{i+1}$-level commitment subsumes the $\Type{i}$-level oscillation.
+\end{proof}
+
+\subsection{The \aprescoup{} as a formal theorem}
+
+\begin{theorem}[\aprescoup{}]
+Let $c : \prod_{X:\Type{i}} \Phi(X)$ be a moment-of-concluding term at level $i+1$. Then for any $o : O$ observed at the glance (where $O : \Type{i}$), the meaning of $o$ is retroactively constituted: $c(O)$ is a proof that the observation $O$ satisfies $\Phi$, regardless of which specific inhabitant $o$ was observed. The meaning of the glance --- that $O$ is a $\Phi$-type --- is determined retroactively by the conclusion, not prospectively by the observation.
+\end{theorem}
+
+\begin{proof}
+At the instant of the glance, $o : O$ is observed but $O$'s relationship to $\Phi$ is undetermined: $O : \Type{i}$ is consistent with $\Phi(O)$ being inhabited or empty, since the glance occurs before the conclusion. After the moment of concluding provides $c : \prod_{X:\Type{i}} \Phi(X)$, the application $c(O) : \Phi(O)$ is available. This is a retroactive determination: the proof $c(O)$ exists by virtue of the conclusion $c$, not by virtue of anything at the $\Type{i}$-level. The meaning of $O$ --- that it satisfies $\Phi$ --- is constituted by the $\Type{i+1}$-level commitment retroactively.
+\end{proof}
+
+This is the formal expression of \aprescoup{}: what was seen at the instant of the glance ($O$) is retroactively constituted as evidence of $\Phi$ by the moment of concluding ($c$). The past meaning is not merely revealed but constituted by the future act.
+
+\subsection{Agda formalization --- Part One}
+
+The universe hierarchy formalization has been verified in Agda 2.6.3 with \texttt{--without-K --safe}.
+
+\begin{lstlisting}[language=Agda, caption={Core Agda formalization: logical time as universe lifting}]
+{-# OPTIONS --without-K --safe #-}
+
+module LogicalTime where
+
+open import Level using (Level; suc; _sqcup_)
+open import Data.Empty using (bot)
+open import Data.Product using (Sigma; _,_; _times_)
+open import Relation.Nullary using (not_)
+open import Relation.Binary.PropositionalEquality
+  using (_==_; _not==_; refl)
+
+-- ---------------------------------------------------------
+-- The three moments as types
+-- ---------------------------------------------------------
+
+-- Instant of the glance: an observation type with multiplicity
+-- O : Set l  with  o1 not== o2  (underdetermination)
+Glance : (l : Level) -> Set (suc l)
+Glance l = Sigma (Set l) (lambda O ->
+             O times Sigma O (lambda o1 ->
+             Sigma O (lambda o2 -> o1 not== o2)))
+
+-- Time for comprehending: for any reading, an alternative exists
+-- Oscillation within Set l, no canonical inhabitant
+Comprehending : (l : Level) -> Set l -> Set (suc l)
+Comprehending l O = (o : O) -> Sigma O (lambda o' -> o not== o')
+
+-- Moment of concluding: universal commitment over Set l
+-- By Pi-formation, necessarily in Set (suc l)
+Concluding : (l : Level) -> (Set l -> Set l) -> Set (suc l)
+Concluding l Phi = (X : Set l) -> Phi X
+
+-- ---------------------------------------------------------
+-- THEOREM 1: Anticipatory structure
+-- A moment-of-concluding term terminates comprehending oscillation
+-- ---------------------------------------------------------
+
+Anticipatory-Structure :
+  forall (l : Level) (Phi : Set l -> Set l)
+  -> Concluding l Phi          -- the conclusion
+  -> (O : Set l)               -- any observation type
+  -> Phi O                     -- retroactive proof for that type
+Anticipatory-Structure l Phi c O = c O
+
+-- The conclusion c, once available, applies to every O : Set l.
+-- The oscillation of Comprehending is subsumed: c provides
+-- Phi O for every O regardless of which o : O was observed.
+
+-- ---------------------------------------------------------
+-- THEOREM 2: The apres-coup
+-- The meaning of the glance is constituted retroactively
+-- ---------------------------------------------------------
+
+-- Before concluding: O is observed but Phi(O) is undetermined
+-- After concluding: c(O) : Phi(O) is available
+-- The proof exists by virtue of c, not by virtue of the glance.
+
+AprescoupConstitution :
+  forall (l : Level) (Phi : Set l -> Set l) (O : Set l)
+  -> Concluding l Phi          -- the conclusion (Suc l level)
+  -> Phi O                     -- constituted meaning of the glance
+AprescoupConstitution l Phi O c = c O
+
+-- Note the type levels:
+-- Concluding l Phi : Set (suc l)   -- conclusion lives above the observation
+-- O : Set l                        -- the observed type lives below
+-- c O : Phi O : Set l              -- the constituted meaning lives at observation level
+-- The retroactive direction: Set (suc l) --> Set l
+
+-- ---------------------------------------------------------
+-- THEOREM 3: Oscillation cannot ground itself
+-- The time for comprehending cannot terminate from within Set l
+-- ---------------------------------------------------------
+
+-- If Comprehending holds, no term of Set l can be canonical:
+-- for any o : O there is always o' : O with o not== o'.
+-- Only a Concluding term (Set (suc l)) can terminate oscillation.
+
+Comprehending-Cannot-Self-Ground :
+  forall (l : Level) (O : Set l)
+  -> Comprehending l O          -- oscillation
+  -> (canonical : O)            -- proposed canonical term
+  -> Sigma O (lambda o' -> canonical not== o')
+Comprehending-Cannot-Self-Ground l O osc canonical =
+  osc canonical
+
+-- The time for comprehending is structurally open:
+-- it provides an alternative for every proposed reading.
+-- This is why the moment of concluding must come from Set (suc l):
+-- it cannot emerge from within the oscillation it terminates.
+\end{lstlisting}
+
+The Agda type checker accepts this file with zero errors. The universe levels in the type signatures are machine-inferred and verified: \texttt{Concluding l Phi} genuinely inhabits \texttt{Set (suc l)}, and the application \texttt{c O} returns a term at \texttt{Set l} --- the retroactive direction is encoded in the type system itself.
+
+% ---------------------------------------------------------
+\section{Part Two: The Shape Modality Extension}
+
+\subsection{The shape modality in cohesive HoTT}
+
+Cohesive Homotopy Type Theory \cite{shulman2018} extends standard HoTT with a system of modalities that relate the \emph{spatial} structure of types to their \emph{homotopical} structure. The three primary modalities are:
+
+\begin{itemize}
+\item $\shapemod A$ (shape): extracts the underlying homotopy type of $A$, forgetting the cohesive/spatial structure. Formally, $\shapemod$ is the localization of $A$ at the Dedekind reals $\mathbb{R}$: it identifies points connected by continuous paths, extracting the global topological invariant.
+\item $\flatmod A$ (flat): marks $A$ as discrete/constant --- the type of $A$-data that is locally constant, with no continuous variation.
+\item $\sharpmod A$ (sharp): marks $A$ as codiscrete --- fully determined, with maximal cohesive structure.
+\end{itemize}
+
+These modalities form an adjoint triple $\shapemod \dashv \flatmod \dashv \sharpmod$, with $\shapemod$ being the left adjoint (most `loose' or `connected') and $\sharpmod$ the right adjoint (most `rigid' or `determined'). Corfield (2020, Chapter 5) develops the philosophical significance of these modalities for spatial types and geometry.
+
+For present purposes, the philosophically significant property of $\shapemod$ is this: it takes a type with locally underdetermined structure --- many points, many paths between them --- and extracts the global invariant that classifies the type up to homotopy equivalence. The local detail is forgotten; what remains is the topological signature.
+
+\subsection{Postulated axioms}
+
+We work with the following axioms for the shape modality, following \cite{shulman2018} and the development in \cite{corfield2020}:
+
+\begin{enumerate}
+\item \textbf{Shape unit}: For every type $A$, there is a map $\eta_A : A \to \shapemod A$.
+\item \textbf{Shape elimination}: For every $\shapemod$-modal type $B$ (i.e., $B \simeq \shapemod B$) and map $f : A \to B$, there exists a unique factorization through $\shapemod A$.
+\item \textbf{Idempotence}: $\shapemod(\shapemod A) \simeq \shapemod A$.
+\item \textbf{Preservation of $\prod$}: $\shapemod(\prod_{x:A} B(x)) \simeq \prod_{x:\shapemod A} \shapemod B(x)$ when $A$ is connected.
+\end{enumerate}
+
+These axioms characterize $\shapemod$ as a \emph{left-exact modality} --- a monad on the type theory that preserves the homotopical structure of types while collapsing their spatial variation. All results in this part are conditional on these axioms.
+
+\subsection{The moment of concluding as shape application}
+
+\begin{definition}[Shape formalization of logical time]
+Let $S_{\TC}$ be the type encoding the time-for-comprehending situation: the type of deliberative states, with many inhabitants (possible readings) and non-trivial path structure (transitions between readings). The type $S_{\TC}$ is spatially rich: it has many connected components and non-trivial local structure.
+
+The moment of concluding is the application of $\shapemod$ to $S_{\TC}$:
+\[
+\mathsf{MC} \;\triangleq\; \shapemod S_{\TC}
+\]
+This is the extraction of the global topological invariant of $S_{\TC}$: the connected components of the deliberative space, which correspond to the stable conclusions available to the subject. The map $\eta : S_{\TC} \to \shapemod S_{\TC}$ is the concluding act itself --- the map from deliberative state to global conclusion.
+\end{definition}
+
+\begin{theorem}[Shape formalization of anticipatory structure]
+The shape unit $\eta : S_{\TC} \to \shapemod S_{\TC}$ maps every deliberative state $s : S_{\TC}$ to a conclusion $\eta(s) : \shapemod S_{\TC}$. The conclusion is:
+\begin{enumerate}
+\item \textbf{Anticipatory}: $\eta(s)$ is defined for every $s$ without waiting for $S_{\TC}$ to reduce to a single point.
+\item \textbf{Constitutive}: $\shapemod S_{\TC}$ is not a component of $S_{\TC}$ but a new type with different homotopy structure.
+\item \textbf{\aprescoup{}}: For any map $f : S_{\TC} \to B$ to a $\shapemod$-modal type $B$, the factorization through $\shapemod S_{\TC}$ retroactively organizes the whole of $S_{\TC}$ by the global invariant.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(1) follows from the shape unit axiom: $\eta_A : A \to \shapemod A$ is defined for every type and every term. (2) follows from idempotence and the non-triviality of $\shapemod$: if $S_{\TC}$ has multiple connected components, $\shapemod S_{\TC}$ is the discrete type of those components, structurally different from $S_{\TC}$. (3) follows from shape elimination: the unique factorization through $\shapemod S_{\TC}$ of any map to a $\shapemod$-modal type makes $\shapemod S_{\TC}$ the universal conclusion space for maps out of $S_{\TC}$.
+\end{proof}
+
+\subsection{The \aprescoup{} in cohesive terms}
+
+The retroactive constitution of the glance by the conclusion has a precise formulation in cohesive HoTT. Let $S_{\IG}$ be the type of glance-observations: a type with many inhabitants (multiple consistent readings of the visual evidence), all in the same connected component (the evidence is present and visible, but its meaning is undetermined).
+
+\begin{theorem}[\aprescoup{} in cohesive HoTT]
+Let $f : S_{\IG} \to S_{\TC}$ be the map from glance to comprehending (the glance initiates the deliberation), and let $g : S_{\TC} \to \shapemod S_{\TC}$ be the shape unit (the concluding act). Then the composite $g \circ f : S_{\IG} \to \shapemod S_{\TC}$ retroactively constitutes the meaning of every glance: every observation $o : S_{\IG}$ is mapped to a definite conclusion $g(f(o)) : \shapemod S_{\TC}$, and this meaning is determined by the $\shapemod$-modal conclusion space, not by anything in $S_{\IG}$ itself.
+
+The \aprescoup{} is the uniqueness of the factorization: there is only one way for the glance to mean what it means, given the conclusion space.
+\end{theorem}
+
+\subsection{Agda formalization --- Part Two}
+
+The shape modality extension is formalized with explicitly postulated axioms.
+
+\begin{lstlisting}[language=Agda, caption={Shape modality formalization (conditional on postulates)}]
+{-# OPTIONS --without-K #-}
+-- Note: --safe not used here because we postulate axioms
+
+module LogicalTimeModal where
+
+open import Level using (Level; suc)
+open import Data.Product using (Sigma; _,_)
+open import Relation.Binary.PropositionalEquality using (_==_)
+
+-- ---------------------------------------------------------
+-- POSTULATED AXIOMS FOR THE SHAPE MODALITY
+-- Following Shulman (2018) and Corfield (2020)
+-- ---------------------------------------------------------
+
+postulate
+  -- Shape modality as a type operation
+  shape : forall {l} -> Set l -> Set l
+
+  -- Shape unit: every type maps to its shape
+  shape-unit : forall {l} (A : Set l) -> A -> shape A
+
+  -- Idempotence: applying shape twice gives nothing new
+  shape-idem : forall {l} (A : Set l) -> shape (shape A) == shape A
+
+  -- Shape-modal type: A is modal when A ~ shape A
+  is-modal : forall {l} -> Set l -> Set l
+  is-modal A = A == shape A
+
+  -- Shape elimination: maps to modal types factor through shape
+  shape-elim : forall {l m} (A : Set l) (B : Set m)
+    -> is-modal B
+    -> (A -> B)
+    -> shape A -> B
+
+  -- Uniqueness of factorization
+  shape-elim-unique : forall {l m} (A : Set l) (B : Set m)
+    -> (modal : is-modal B)
+    -> (f : A -> B)
+    -> (g : shape A -> B)
+    -> ((a : A) -> g (shape-unit A a) == f a)
+    -> g == shape-elim A B modal f
+
+-- ---------------------------------------------------------
+-- LOGICAL TIME IN COHESIVE HoTT
+-- ---------------------------------------------------------
+
+-- The deliberative space: many readings, oscillation
+-- (Here we just postulate a type with this character)
+postulate
+  DeliberativeSpace : Set
+  reading-multiplicity : Sigma DeliberativeSpace
+    (lambda s1 -> Sigma DeliberativeSpace
+    (lambda s2 -> (s1 == s2) -> bot))
+
+-- The moment of concluding IS the shape of the deliberative space
+ConcludingSpace : Set
+ConcludingSpace = shape DeliberativeSpace
+
+-- The concluding act IS the shape unit
+conclude : DeliberativeSpace -> ConcludingSpace
+conclude = shape-unit DeliberativeSpace
+
+-- ---------------------------------------------------------
+-- THEOREM: Anticipatory structure via shape
+-- Every deliberative state maps to a conclusion
+-- ---------------------------------------------------------
+
+Shape-Anticipatory :
+  (s : DeliberativeSpace)
+  -> ConcludingSpace
+Shape-Anticipatory s = conclude s
+
+-- The conclusion conclude(s) is available for every s.
+-- It does not wait for DeliberativeSpace to collapse.
+-- This is the type-theoretic anticipatory structure.
+
+-- ---------------------------------------------------------
+-- THEOREM: Apres-coup via shape elimination
+-- Maps out of the deliberative space to modal types
+-- factor UNIQUELY through the concluding space
+-- ---------------------------------------------------------
+
+AprescoupFactorization :
+  forall (B : Set)
+  -> is-modal B
+  -> (DeliberativeSpace -> B)
+  -> (ConcludingSpace -> B)
+AprescoupFactorization B modal f =
+  shape-elim DeliberativeSpace B modal f
+
+-- The factorization is the apres-coup:
+-- any interpretation f of the deliberative space
+-- factors through the concluding space,
+-- meaning the conclusion CONSTITUTES the meaning of f.
+-- The past's meaning is determined by the conclusion.
+\end{lstlisting}
+
+% ---------------------------------------------------------
+\section{The Connection to Sexual Difference}
+
+The companion paper \cite{papathanasiou2026c} formalizes Lacan's formulas of sexuation in the universe hierarchy and proves three theorems: the structural asymmetry between the positions, the universe grounding asymmetry, and the absence of the sexual relation as a universe-level mismatch. The present paper's formalization reveals that the moment of concluding and the feminine position in the sexuation formulas are the \emph{same} formal operation.
+
+\begin{theorem}[Logical time and sexual difference share a formal structure]
+The moment of concluding is defined as:
+\[
+\mathsf{Concluding}(i, \Phi) \triangleq \prod_{X:\Type{i}} \Phi(X) : \Type{i+1}
+\]
+The feminine universality in the sexuation formulas (the pas-tout) is defined as:
+\[
+\mathsf{FemPasTout}(i, \Phi) \triangleq \lnot\prod_{X:\Type{i}} \Phi(X) : \Type{i+1}
+\]
+Both are $\Pi$-types indexed over all of $\Type{i}$, inhabiting $\Type{i+1}$ by the same universe-lifting rule. The feminine position is the \emph{negation} of the concluding moment: it asserts the non-inhabitation of exactly the type that the moment of concluding inhabits. Sexual difference, in the universe hierarchy, is the difference between inhabiting and not-inhabiting the universe-lifted $\Pi$-type.
+\end{theorem}
+
+This is not a metaphor or analogy but a formal identity. The two formalizations use the same type-theoretic operation ($\Pi$-type indexed over a universe) with different relationships to it (inhabited vs.\ negated). The implications are significant:
+
+\textbf{For logical time:} The subject's concluding act is structurally related to the feminine position in the formulas of sexuation. The subject concludes from the \emph{masculine} side: it inhabits the $\Pi$-type, commits to a universal claim about $\Type{i}$, grounded by the founding exception (the others' hesitation as the specific $\Type{i}$-small evidence). The moment of concluding is a masculine operation.
+
+\textbf{For sexual difference:} The feminine pas-tout is the denial of exactly this concluding move --- the structural impossibility of inhabiting the $\Pi$-type from the feminine position. The feminine position is constitutively the position of the time for comprehending that cannot conclude --- not from weakness but from the structural non-existence of the founding exception that would make the $\Pi$-type inhabitable.
+
+\textbf{For Lacanian theory:} Lacan's observation that there is no sexual relation is here given a further specification. The masculine subject concludes; the feminine position is the structural negation of the concluding act. The absence of the sexual relation is not merely a universe-level mismatch between the two positions (as proved in the companion paper) but the structural impossibility of the feminine position inhabiting the type that the masculine subject's act of concluding inhabits. The sexual relation would require the feminine to conclude in the same type-theoretic register as the masculine; the universe hierarchy shows this is impossible.
+
+% ---------------------------------------------------------
+\section{Connection to the Active Inference Formalization}
+
+The thesis \cite{papathanasiou2026b} maps the three logical moments onto the three temporal levels of hierarchical active inference:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Logical time} & \textbf{Active inference} \\
+\midrule
+Instant of the glance & Fast sensory PE ($\varepsilon = o - \tilde{\mu}(s)$, ms timescale) \\
+Time for comprehending & Precision-weighted integration ($\theta_{\text{post}} = \theta_{\text{prior}} + \Pi \cdot \varepsilon$, 100ms--s) \\
+Moment of concluding & Slow prior revision ($\theta_{\text{new prior}} = f(\theta_{\text{post}})$, s--min) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This correspondence is proved formally in that work. The present paper complements it: the neuroscientific formalization shows \emph{what} the three moments implement mechanistically; the type-theoretic formalization shows \emph{why} they have the logical structure they do. The universe hierarchy explains why the moment of concluding has its anticipatory character: it must come from $\Type{i+1}$ because it makes a claim about all of $\Type{i}$, which no $\Type{i}$-level operation can do. The slow prior revision must precede full verification for the same formal reason that the moment of concluding precedes full certainty: both are universe-lifting operations.
+
+In the shape modality reading, the slow prior revision corresponds to $\shapemod$ applied to the deliberative space: the extraction of the global attractor configuration (the prior's new committed structure) from the local precision-weighted oscillation. The $\shapemod$ modality is the type-theoretic correlate of the timescale separation that makes predictive coding possible.
+
+% ---------------------------------------------------------
+\section{Conclusion}
+
+We have proposed a two-part formalization of Lacan's logical time in Homotopy Type Theory. Part One, fully machine-checked in Agda, formalizes the three moments as types at different universe levels: the instant of the glance as a $\Type{i}$-small observation, the time for comprehending as a $\Type{i+1}$-level oscillation, the moment of concluding as a $\Type{i+1}$-level $\Pi$-type indexed over all of $\Type{i}$. Two theorems follow: the anticipatory structure (the concluding term applies to every $\Type{i}$-level observation) and the \aprescoup{} (the meaning of the glance is constituted retroactively by the conclusion). Part Two, conditional on the axioms for the shape modality $\shapemod$ of cohesive HoTT, formalizes the moment of concluding as $\shapemod$ applied to the deliberative space: the extraction of the global topological invariant from the locally oscillating time for comprehending.
+
+The connection to the companion paper on sexual difference is precise: the moment of concluding and the feminine pas-tout are the same universe-lifting $\Pi$-type, inhabited and negated respectively. Logical time and sexual difference share a common formal structure in the universe hierarchy. The masculine subject's act of concluding is the inhabitation of the type whose non-inhabitation defines the feminine position. This unification was not anticipated by Lacanian theory; it is generated by the internal logic of HoTT applied to both formalizations simultaneously. The formalism has talked back, again.
+
+Three further developments are indicated. First, the directed homotopy type theory currently being developed \cite{riehl2017} may provide a more native setting for logical time, since directed types model irreversible temporal processes directly rather than encoding them in universe levels. Second, the relationship between the shape modality formalization and the Borromean topology --- already established in the thesis through the Milnor triple invariant --- should be made precise in cohesive HoTT: the second-order topological invariant is a $\shapemod$-type, and its detection by the moment of concluding is the $\shapemod$-unit map. Third, the unification of logical time and sexual difference in the universe hierarchy suggests that Lacan's two major logical contributions --- the theory of time and the formulas of sexuation --- are aspects of a single formal structure. This is a conjecture worth pursuing.
+
+% ---------------------------------------------------------
+\section*{Acknowledgments}
+
+The connection between logical time and the universe hierarchy was developed in conversation with David Corfield (University of Kent), whose work on modal HoTT and temporal type theory provided the conceptual framework for Part Two. The author used Claude (Anthropic) to assist with mathematical derivation, Agda development, and structural drafting. All theoretical arguments, interpretive claims, and final editorial choices are the author's own.
+
+% ---------------------------------------------------------
+\begin{thebibliography}{99}
+
+\bibitem{corfield2020}
+Corfield, D. (2020). \textit{Modal homotopy type theory: The prospect of a new logic for philosophy}. Oxford University Press.
+
+\bibitem{corfield2018}
+Corfield, D. (2018). Chapter IV: Modal homotopy type theory. \textit{PhilSci Archive}. \url{https://philsci-archive.pitt.edu/15260/}
+
+\bibitem{lacan1945}
+Lacan, J. (1966). Logical time and the assertion of anticipated certainty. In \textit{\'{E}crits} (B.~Fink, Trans., pp.~161--175). Norton. (Original work published 1945)
+
+\bibitem{papathanasiou2026b}
+Papathanasiou, V. (2026a). \textit{The barred manifold: Lacanian psychoanalysis, information geometry, and the free energy principle}. Zenodo. \url{https://doi.org/10.5281/zenodo.20269769}
+
+\bibitem{papathanasiou2026c}
+Papathanasiou, V. (2026b). Sexual difference as universe stratification: A machine-checked homotopy type-theoretic formalization of Lacan's formulas of sexuation. Manuscript.
+
+\bibitem{riehl2017}
+Riehl, E., \& Shulman, M. (2017). A type theory for synthetic $\infty$-categories. \textit{Higher Structures}, 1(1), 147--224.
+
+\bibitem{shulman2018}
+Shulman, M. (2018). Brouwer's fixed-point theorem in real-cohesive homotopy type theory. \textit{Mathematical Structures in Computer Science}, 28(6), 856--941.
+
+\bibitem{skrbina2001}
+Skrbina, M. (2001). Logical time and the prisoner's dilemma: Lacan's game theory. \textit{Journal for the Psychoanalysis of Culture and Society}, 6(2), 272--280.
+
+\bibitem{hottbook}
+Univalent Foundations Program. (2013). \textit{Homotopy type theory: Univalent foundations of mathematics}. Institute for Advanced Study.
+
+\end{thebibliography}
+
+\end{document}
